@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="mb-8">
+  <h1 class="mono text-3xl font-bold mb-2">Bullet Rewriter</h1>
+  <p style="color: var(--muted);">Paste a weak bullet. Get 3 rewrites in your voice.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+  <!-- LEFT: INPUT -->
+  <div class="space-y-4">
+
+    <div class="surface rounded-lg p-6">
+      <label class="mono text-xs uppercase tracking-widest mb-3 block" style="color: var(--muted);">Your Writing Style</label>
+      <textarea id="writing-style" rows="4"
+        class="w-full rounded px-4 py-3 text-sm focus:outline-none resize-none"
+        style="background:#111; border:1px solid var(--border); color:var(--text);">Direct and confident. Short sentences. Outcome first. No fluff. No corporate buzzwords. Sounds like a real person talking, not a formal document. Punchy, clear, and to the point.</textarea>
+      <p class="text-xs mt-2" style="color: var(--muted);">This is pre-filled with Soumya's style. Change it to match your own voice.</p>
+    </div>
+
+    <div class="surface rounded-lg p-6">
+      <label class="mono text-xs uppercase tracking-widest mb-3 block" style="color: var(--muted);">Weak Bullet to Rewrite</label>
+      <textarea id="weak-bullet" rows="5" placeholder="Paste your weak bullet here..."
+        class="w-full rounded px-4 py-3 text-sm focus:outline-none resize-none"
+        style="background:#111; border:1px solid var(--border); color:var(--text);"></textarea>
+
+      <button class="btn-primary mt-4 w-full" onclick="runRewrite()">
+        REWRITE BULLET
+      </button>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+
+    <!-- Loading -->
+    <div id="loading-panel" class="hidden surface rounded-lg p-8 text-center">
+      <div class="mono text-sm mb-2" style="color: var(--accent);">Rewriting...</div>
+      <div class="mono text-xs" style="color: var(--muted);">Applying your writing style</div>
+    </div>
+
+    <!-- Error -->
+    <div id="error-panel" class="hidden surface rounded-lg p-6">
+      <div class="mono text-sm mb-2" style="color: #EF4444;">Error</div>
+      <div id="error-message" class="text-sm" style="color: var(--muted);"></div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-panel" class="hidden space-y-4">
+
+      <!-- Issues found -->
+      <div class="surface rounded-lg p-5">
+        <div class="mono text-xs uppercase tracking-widest mb-3" style="color: #EF4444;">Issues Found in Original</div>
+        <ul id="issues-list" class="space-y-2 text-sm"></ul>
+      </div>
+
+      <!-- 3 versions -->
+      <div id="versions-list" class="space-y-4"></div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function runRewrite() {
+  const bullet = document.getElementById('weak-bullet').value.trim();
+  const style = document.getElementById('writing-style').value.trim();
+
+  document.getElementById('results-panel').classList.add('hidden');
+  document.getElementById('error-panel').classList.add('hidden');
+  document.getElementById('loading-panel').classList.remove('hidden');
+
+  try {
+    const response = await fetch('/rewriter/rewrite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weak_bullet: bullet, writing_style: style })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      showError(data.error);
+      return;
+    }
+
+    renderResults(data);
+
+  } catch (err) {
+    showError('Something went wrong. Check the server is running.');
+  } finally {
+    document.getElementById('loading-panel').classList.add('hidden');
+  }
+}
+
+function renderResults(d) {
+  // Issues
+  document.getElementById('issues-list').innerHTML = d.issues_found.map(i =>
+    `<li class="flex gap-2"><span style="color:#EF4444;">✗</span><span>${i}</span></li>`
+  ).join('');
+
+  // Versions
+  document.getElementById('versions-list').innerHTML = d.versions.map((v, i) =>
+    `<div class="surface rounded-lg p-5">
+      <div class="flex justify-between items-center mb-3">
+        <div class="mono text-xs uppercase tracking-widest" style="color: var(--accent);">Version ${i + 1}</div>
+        <button onclick="copyText('${escapeBullet(v.bullet)}')"
+          class="mono text-xs px-3 py-1 rounded"
+          style="border:1px solid var(--border); color:var(--muted); cursor:pointer; background:transparent;">
+          COPY
+        </button>
+      </div>
+      <p class="text-sm mb-3" style="line-height:1.6;">${v.bullet}</p>
+      <p class="text-xs" style="color: var(--muted);">↳ ${v.why}</p>
+    </div>`
+  ).join('');
+
+  document.getElementById('results-panel').classList.remove('hidden');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+}
+
+function escapeBullet(text) {
+  return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function showError(msg) {
+  document.getElementById('error-message').textContent = msg;
+  document.getElementById('error-panel').classList.remove('hidden');
+}
+</script>
+
+{% endblock %}
