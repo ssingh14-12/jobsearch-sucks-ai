@@ -17,10 +17,11 @@ import { useJD } from '../context/JDContext';
 import './Screener.css';
 
 export default function Screener() {
-  const { loadJD } = useJD();
+  const { jd, loadJD } = useJD();
   const navigate = useNavigate();
 
-  const [jdText, setJdText]     = useState('');
+  // Pre-fill with any JD already loaded (e.g. user pasted it on another page first)
+  const [jdText, setJdText]     = useState(jd || '');
   const [loading, setLoading]   = useState(false);
   const [result, setResult]     = useState(null);
   const [error, setError]       = useState('');

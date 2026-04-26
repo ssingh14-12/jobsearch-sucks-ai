@@ -1,61 +1,96 @@
-/* JDBar.css — Slim context strip below the nav */
+/* JDBar.css — Expandable JD context strip */
 
+.jdbar-wrap {
+  border-bottom: 1px solid #1E1E30;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Collapsed strip ── */
 .jdbar {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.5rem 2rem;
+  padding: 0.55rem 2rem;
   font-size: 0.8rem;
-  border-bottom: 1px solid #1E1E30;
 }
 
+/* No JD — amber */
 .jdbar--empty {
-  background: rgba(245, 158, 11, 0.06);
-  color: #F59E0B;
-  border-bottom-color: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.05);
+  color: #5A5A78;
 }
 
+.jdbar-warn-icon {
+  color: #F59E0B;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.jdbar-warn-text {
+  color: #F59E0B;
+}
+
+/* JD loaded — cyan */
 .jdbar--loaded {
   background: rgba(0, 200, 224, 0.04);
   color: #5A5A78;
 }
 
-.jdbar-role {
-  color: #EEEEF5;
-  font-weight: 600;
-}
+.jdbar-role    { color: #EEEEF5; font-weight: 600; }
+.jdbar-company { color: #EEEEF5; }
+.jdbar-date    { color: #5A5A78; font-size: 0.75rem; }
+.jdbar-sep     { color: #1E1E30; }
 
-.jdbar-company {
-  color: #EEEEF5;
-}
-
-.jdbar-date {
-  color: #5A5A78;
-}
-
-.jdbar-sep {
-  color: #1E1E30;
-}
-
-.jdbar-change {
+/* Right side — Change + Clear */
+.jdbar-right {
   margin-left: auto;
-  color: #5A5A78;
-  text-decoration: none;
-  font-size: 0.75rem;
-  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.jdbar-change:hover {
-  color: #00C8E0;
-}
-
-.jdbar-link {
+/* "Paste JD here →" button (empty state) */
+.jdbar-action-btn {
+  margin-left: auto;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
   color: #F59E0B;
-  text-decoration: underline;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
+.jdbar-action-btn:hover { background: rgba(245, 158, 11, 0.18); }
 
-/* reuse pulse-dot from Nav.css */
+/* "Change JD" button (loaded state) */
+.jdbar-change {
+  background: none;
+  border: none;
+  color: #5A5A78;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 0;
+}
+.jdbar-change:hover { color: #00C8E0; }
+
+/* "✕ Clear" button */
+.jdbar-clear {
+  background: none;
+  border: none;
+  color: #2A2A40;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+.jdbar-clear:hover { color: #EF4444; }
+
+/* Pulse dot */
 .pulse-dot {
   width: 6px;
   height: 6px;
@@ -68,4 +103,96 @@
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* ── Expanded textarea panel ── */
+.jdbar-expanded {
+  padding: 1.25rem 2rem;
+  background: #0D0D1A;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-top: 1px solid #1E1E30;
+  animation: slideDown 0.18s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.jdbar-textarea {
+  width: 100%;
+  background: #07070F;
+  border: 1px solid #1E1E30;
+  border-radius: 10px;
+  color: #EEEEF5;
+  font-size: 0.875rem;
+  font-family: inherit;
+  padding: 0.875rem 1rem;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+
+.jdbar-textarea:focus {
+  outline: none;
+  border-color: #00C8E0;
+}
+
+.jdbar-textarea::placeholder { color: #2A2A40; }
+
+.jdbar-error {
+  color: #EF4444;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Bottom action row */
+.jdbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.jdbar-load-btn {
+  padding: 0.5rem 1.25rem;
+  background: #00C8E0;
+  color: #07070F;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.jdbar-load-btn:hover {
+  box-shadow: 0 0 18px rgba(0, 200, 224, 0.35);
+  transform: translateY(-1px);
+}
+
+.jdbar-cancel-btn {
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid #1E1E30;
+  color: #5A5A78;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.jdbar-cancel-btn:hover {
+  border-color: #2A2A40;
+  color: #EEEEF5;
+}
+
+.jdbar-hint {
+  font-size: 0.75rem;
+  color: #2A2A40;
+  margin-left: auto;
 }
