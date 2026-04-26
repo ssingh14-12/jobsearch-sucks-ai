@@ -19,8 +19,8 @@ export default function Nav() {
     <nav className="nav">
       {/* Left: Logo / Brand */}
       <div className="nav-brand">
-        <span className="nav-logo-mark">JS</span>
-        <span className="nav-logo-text">JobSearch<span className="nav-accent">.AI</span></span>
+        <span className="nav-logo-mark">JSS</span>
+        <span className="nav-logo-text">Job Search <span className="nav-accent">Sucks</span></span>
       </div>
 
       {/* Center: Page Links */}

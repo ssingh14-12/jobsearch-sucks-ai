@@ -1,10 +1,12 @@
-# JobSearch.AI — Master Context File
+# Job Search Sucks — Master Context File
 # Read this first. Do not write any code until you confirm understanding.
 # Last updated: Session 4 — April 26, 2026
 
 ---
 
 ## 1. What This Project Is
+
+**Product name: Job Search Sucks**
 
 A web application that makes resume building faster, smarter, and in the user's own voice — not AI voice. Built by **Soumya Singh**. Started as a personal tool, being built into a product others can use (invite-only for now).
 
