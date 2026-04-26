@@ -1,88 +1,106 @@
 /**
  * Screener.jsx — Page 1: Job Fit Screener (The Hub)
  *
- * This is the first page every user lands on.
  * Flow:
- *   1. Paste JD → stored in JDContext (global)
- *   2. Upload vault (resumes, Holy Grail, LinkedIn PDF)
- *   3. Hit Analyze → Flask API runs Holy Grail rules
- *   4. Results: GO/NO GO, score ring, gaps, ATS check
- *   5. Chatbot for follow-up questions
- *   6. "Build My Resume →" carries everything to Page 2
+ *   1. Paste JD → hits Flask /screener/analyze → Claude runs Holy Grail rules
+ *   2. Results: GO/NO GO, score ring, gaps, strong matches, ATS, visa flag
+ *   3. "Build My Resume →" carries everything to Page 2
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJD } from '../context/JDContext';
+import { api } from '../api';
 import './Screener.css';
+
+// Simple client-side extractor — gets company + title from raw JD text
+// Flask gives us role_family but not the exact title from the JD itself
+function quickParse(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let title = '';
+  for (const line of lines.slice(0, 6)) {
+    if (line.length > 80 || line.toLowerCase().includes('http')) continue;
+    if (/^(location|salary|about|company)/i.test(line)) continue;
+    if (line.length > 4 && line.length < 70) { title = line; break; }
+  }
+  const aboutMatch = text.match(/About\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n:])/);
+  const atMatch    = text.match(/\bat\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n])/);
+  const company    = (aboutMatch?.[1] || atMatch?.[1] || '').trim();
+  return { title: title || 'Role', company };
+}
 
 export default function Screener() {
   const { jd, loadJD } = useJD();
   const navigate = useNavigate();
 
-  // Pre-fill with any JD already loaded (e.g. user pasted it on another page first)
-  const [jdText, setJdText]     = useState(jd || '');
-  const [loading, setLoading]   = useState(false);
-  const [result, setResult]     = useState(null);
-  const [error, setError]       = useState('');
+  // Pre-fill if JD already loaded from another page
+  const [jdText, setJdText]   = useState(jd || '');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult]   = useState(null);
+  const [error, setError]     = useState('');
 
   async function handleAnalyze() {
-    if (!jdText.trim()) {
-      setError('Paste a job description first.');
-      return;
-    }
+    if (!jdText.trim()) { setError('Paste a job description first.'); return; }
+    if (jdText.trim().length < 50) { setError('JD is too short — paste the full description.'); return; }
     setError('');
     setLoading(true);
+    setResult(null);
+
+    // Extract title + company client-side before calling Flask
+    const { title, company } = quickParse(jdText);
 
     try {
-      // TODO: replace with real API call to Flask /api/screen
-      // const res = await axios.post('http://localhost:5000/api/screen', { jd: jdText });
-      // const data = res.data;
+      /**
+       * POST http://localhost:5000/screener/analyze
+       * Body: { jd_text: string, company_name: string }
+       *
+       * Flask calls Claude with Holy Grail rules and returns:
+       * { decision, decision_reason, match_score, role_family,
+       *   base_resume, visa_flag, visa_note, strong_matches,
+       *   top_gaps: [{gap, severity}], red_flags }
+       */
+      const res  = await api.post('/screener/analyze', {
+        jd_text:      jdText,
+        company_name: company || 'Unknown Company',
+      });
 
-      // Mock result for now — remove when Flask API is ready
-      await new Promise(r => setTimeout(r, 1500));
-      const data = {
-        score: 8,
-        verdict: 'GO',
-        jobTitle: 'Product Manager',
-        company: 'Salesforce',
-        postingDate: 'Apr 20, 2026',
-        closestResume: 'V5: BA / Salesforce & AI',
-        gaps: ['Salesforce CPQ experience', 'Enterprise B2B sales cycle'],
-        strongMatches: ['Agile delivery', 'Stakeholder management', 'Power BI'],
-        visaFlag: false,
-        atsScore: 74,
-      };
+      const data = res.data;
 
-      // Write to global JD context so all pages can see it
+      // Write to global JDContext — all other pages can now see this JD
       loadJD({
-        rawText: jdText,
-        title: data.jobTitle,
-        companyName: data.company,
-        date: data.postingDate,
+        rawText:     jdText,
+        title:       title || data.role_family || 'Role',
+        companyName: company,
+        date:        '',
       });
 
       setResult(data);
     } catch (err) {
-      setError('Something went wrong. Is Flask running on port 5000?');
+      const msg = err.response?.data?.error || err.message;
+      if (err.code === 'ERR_NETWORK') {
+        setError('Cannot reach Flask — make sure it is running on port 5000.');
+      } else {
+        setError(`Analysis failed: ${msg}`);
+      }
     } finally {
       setLoading(false);
     }
   }
 
-  const scoreColor = result
-    ? result.score >= 8 ? '#10B981'
-    : result.score >= 6 ? '#F59E0B'
-    : '#EF4444'
-    : '#5A5A78';
+  // Colour based on score
+  const score      = result?.match_score ?? 0;
+  const scoreColor = score >= 8 ? '#10B981' : score >= 6 ? '#F59E0B' : '#EF4444';
+  const verdict    = result?.decision ?? '';
 
   return (
     <div className="screener-page">
 
-      {/* ── Hero Header ── */}
+      {/* ── Header ── */}
       <div className="screener-header">
         <h1 className="screener-title">Job Fit Screener</h1>
-        <p className="screener-sub">Paste a JD. Get a GO / NO GO in seconds — powered by your Holy Grail rules.</p>
+        <p className="screener-sub">
+          Paste a JD. Claude runs your Holy Grail rules and gives you a GO / NO GO in seconds.
+        </p>
       </div>
 
       {/* ── JD Input ── */}
@@ -90,34 +108,26 @@ export default function Screener() {
         <label className="field-label">Job Description</label>
         <textarea
           className="jd-textarea"
-          placeholder="Paste the full job description here — title, responsibilities, requirements, everything..."
+          placeholder="Paste the full job description — title, responsibilities, requirements, everything..."
           value={jdText}
           onChange={e => setJdText(e.target.value)}
           rows={10}
         />
         {error && <p className="screener-error">{error}</p>}
-        <button
-          className="btn-primary"
-          onClick={handleAnalyze}
-          disabled={loading}
-        >
-          {loading ? <span className="spinner" /> : null}
-          {loading ? 'Analyzing...' : 'Analyze This JD →'}
+        <button className="btn-primary" onClick={handleAnalyze} disabled={loading}>
+          {loading && <span className="spinner" />}
+          {loading ? 'Analyzing with Claude...' : 'Analyze This JD →'}
         </button>
       </div>
 
-      {/* ── Results (shown after analysis) ── */}
+      {/* ── Results ── */}
       {result && (
         <div className="screener-results">
 
           {/* Verdict Banner */}
-          <div className={`verdict-banner verdict-${result.verdict.toLowerCase()}`}>
-            <span className="verdict-label">{result.verdict}</span>
-            <span className="verdict-sub">
-              {result.verdict === 'GO'
-                ? `Score ${result.score}/10 · ${result.company} · ${result.closestResume}`
-                : `Score ${result.score}/10 · Too many gaps to bridge cleanly`}
-            </span>
+          <div className={`verdict-banner verdict-${verdict === 'GO' ? 'go' : 'no_go'}`}>
+            <span className="verdict-label">{verdict}</span>
+            <span className="verdict-sub">{result.decision_reason}</span>
           </div>
 
           {/* Score Ring */}
@@ -129,23 +139,35 @@ export default function Screener() {
                 className="ring-fill"
                 stroke={scoreColor}
                 strokeDasharray="226.2"
-                strokeDashoffset={226.2 - (226.2 * result.score / 10)}
+                strokeDashoffset={226.2 - (226.2 * score / 10)}
               />
             </svg>
             <div className="score-ring-text">
-              <span className="score-number" style={{ color: scoreColor }}>{result.score}</span>
+              <span className="score-number" style={{ color: scoreColor }}>{score}</span>
               <span className="score-denom">/10</span>
             </div>
           </div>
 
-          {/* Gap Analysis */}
-          {result.gaps.length > 0 && (
+          {/* Role + Resume match */}
+          <div className="result-section">
+            <p className="section-label">Best Resume Match</p>
+            <p className="match-detail">
+              <strong>{result.role_family}</strong>
+              {result.base_resume && <span className="muted"> · {result.base_resume}</span>}
+            </p>
+          </div>
+
+          {/* Gaps */}
+          {result.top_gaps?.length > 0 && (
             <div className="result-section">
               <p className="section-label">Gaps to Bridge</p>
               <ul className="gap-list">
-                {result.gaps.map(g => (
-                  <li key={g} className="gap-item">
-                    <span className="badge badge-warn">Gap</span> {g}
+                {result.top_gaps.map((g, i) => (
+                  <li key={i} className="gap-item">
+                    <span className={`badge badge-${g.severity === 'HIGH' ? 'nogo' : g.severity === 'MEDIUM' ? 'warn' : 'gray'}`}>
+                      {g.severity}
+                    </span>
+                    {g.gap}
                   </li>
                 ))}
               </ul>
@@ -153,39 +175,45 @@ export default function Screener() {
           )}
 
           {/* Strong Matches */}
-          {result.strongMatches.length > 0 && (
+          {result.strong_matches?.length > 0 && (
             <div className="result-section">
               <p className="section-label">Strong Matches</p>
               <div className="chip-row">
-                {result.strongMatches.map(m => (
-                  <span key={m} className="chip chip-go">{m}</span>
+                {result.strong_matches.map((m, i) => (
+                  <span key={i} className="chip chip-go">{m}</span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ATS Score */}
-          <div className="result-section">
-            <p className="section-label">ATS Keyword Match</p>
-            <div className="ats-bar-wrap">
-              <div className="ats-bar" style={{ width: `${result.atsScore}%`, background: scoreColor }} />
+          {/* Red Flags */}
+          {result.red_flags?.length > 0 && (
+            <div className="result-section">
+              <p className="section-label">Red Flags</p>
+              <ul className="gap-list">
+                {result.red_flags.map((f, i) => (
+                  <li key={i} className="gap-item">
+                    <span className="badge badge-nogo">Flag</span> {f}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <p className="ats-label">{result.atsScore}% keyword coverage</p>
-          </div>
+          )}
 
-          {/* Visa Flag */}
-          {result.visaFlag && (
-            <div className="visa-flag">
-              ⚠️ This role may not support visa sponsorship. Verify on myvisajobs.com before applying.
+          {/* Visa */}
+          {result.visa_flag && result.visa_flag !== 'CLEAR' && (
+            <div className={`visa-flag ${result.visa_flag === 'SKIP' ? 'visa-skip' : ''}`}>
+              {result.visa_flag === 'SKIP' ? '🚫' : '⚠️'} {result.visa_note}
             </div>
           )}
 
           {/* CTA */}
-          {result.score >= 6 && (
+          {score >= 6 && (
             <button className="btn-primary btn-cta" onClick={() => navigate('/resume')}>
               Build My Resume →
             </button>
           )}
+
         </div>
       )}
     </div>

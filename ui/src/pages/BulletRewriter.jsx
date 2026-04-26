@@ -1,50 +1,53 @@
 /**
  * BulletRewriter.jsx — Page 3: Bullet Rewriter
  *
- * Gets JD from global context — no re-paste.
- * User pastes a weak bullet → gets 3–5 rewrites in their voice,
- * tailored to the JD, Holy Grail rules applied.
+ * Calls Flask /rewriter/rewrite → Claude rewrites in Soumya's voice.
+ * JD from global context tailors the rewrite to the target role.
+ * No JD? Still works — rewrites for general use.
  */
 
 import { useState } from 'react';
 import JDBar from '../components/JDBar';
 import { useJD } from '../context/JDContext';
+import { api } from '../api';
 import './BulletRewriter.css';
 
 export default function BulletRewriter() {
   const { jd, jobTitle } = useJD();
-  const [bullet, setBullet]     = useState('');
-  const [results, setResults]   = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [copied, setCopied]     = useState(null);
+
+  const [bullet, setBullet]   = useState('');
+  const [results, setResults] = useState(null);   // { issues_found, versions }
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+  const [copied, setCopied]   = useState(null);
 
   async function handleRewrite() {
     if (!bullet.trim()) return;
+    setError('');
     setLoading(true);
+    setResults(null);
 
     try {
-      // TODO: replace with real Flask API call
-      // const res = await axios.post('http://localhost:5000/api/rewrite', { bullet, jd });
-      await new Promise(r => setTimeout(r, 1200));
+      /**
+       * POST http://localhost:5000/rewriter/rewrite
+       * Body: { weak_bullet: string, jd: string (optional) }
+       *
+       * Flask returns:
+       * { issues_found: string[], versions: [{ bullet, tone, why }] }
+       */
+      const res = await api.post('/rewriter/rewrite', {
+        weak_bullet: bullet,
+        jd:          jd || '',   // send JD from context so Claude can tailor the rewrite
+      });
 
-      // Mock results — remove when Flask is wired
-      setResults([
-        {
-          id: 1,
-          text: 'Reduced client onboarding time by 32% across 11 enterprise releases by standardizing BRD templates and coordinating UAT sign-off across 3 cross-functional teams.',
-          tone: 'Outcome-first',
-        },
-        {
-          id: 2,
-          text: 'Accelerated deployment reliability by 30% through CI/CD pipeline improvements in Azure DevOps, eliminating 10 recurring defect patterns across quarterly releases.',
-          tone: 'Technical depth',
-        },
-        {
-          id: 3,
-          text: 'Cut repeat escalations by 43% by building a defect tracking framework adopted across 3 teams — translating raw QA data into actionable pattern reports for 50+ stakeholders.',
-          tone: 'Stakeholder-focused',
-        },
-      ]);
+      setResults(res.data);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      if (err.code === 'ERR_NETWORK') {
+        setError('Cannot reach Flask — make sure it is running on port 5000.');
+      } else {
+        setError(`Rewrite failed: ${msg}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -60,14 +63,16 @@ export default function BulletRewriter() {
     <div className="page-layout">
       <JDBar />
       <div className="page-content">
+
         <div className="page-header">
           <h1 className="page-title">Bullet Rewriter</h1>
           <p className="page-sub">
-            Paste a weak bullet. Get 3–5 rewrites in your voice
+            Paste a weak bullet. Get 3 rewrites in your voice
             {jobTitle ? `, tailored for ${jobTitle}` : ''} — Holy Grail rules applied.
           </p>
         </div>
 
+        {/* Input Card */}
         <div className="rewriter-card">
           <label className="field-label">Your Original Bullet</label>
           <textarea
@@ -77,35 +82,60 @@ export default function BulletRewriter() {
             onChange={e => setBullet(e.target.value)}
             rows={4}
           />
+
           {!jd && (
             <p className="rewriter-note">
-              💡 Tip: Go to Screener and paste a JD first — rewrites will be tailored to that role.
+              💡 No JD loaded — rewrites will be general. Paste a JD in the bar above to tailor them to a specific role.
             </p>
           )}
-          <button className="btn-primary" onClick={handleRewrite} disabled={loading || !bullet.trim()}>
-            {loading ? <span className="spinner" /> : null}
-            {loading ? 'Rewriting...' : 'Rewrite This Bullet →'}
+
+          {error && <p className="screener-error">{error}</p>}
+
+          <button
+            className="btn-primary"
+            onClick={handleRewrite}
+            disabled={loading || !bullet.trim()}
+          >
+            {loading && <span className="spinner" />}
+            {loading ? 'Rewriting with Claude...' : 'Rewrite This Bullet →'}
           </button>
         </div>
 
-        {results.length > 0 && (
+        {/* Issues found */}
+        {results?.issues_found?.length > 0 && (
+          <div className="issues-card">
+            <p className="section-label">What's Wrong with the Original</p>
+            <ul className="issues-list">
+              {results.issues_found.map((issue, i) => (
+                <li key={i} className="issue-item">
+                  <span className="issue-dot">·</span> {issue}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Rewritten versions */}
+        {results?.versions?.length > 0 && (
           <div className="results-stack">
-            {results.map((r, i) => (
-              <div key={r.id} className={`rewrite-card accent-${i}`}>
+            {results.versions.map((v, i) => (
+              <div key={i} className={`rewrite-card accent-${i}`}>
                 <div className="rewrite-top">
-                  <span className="rewrite-tone">{r.tone}</span>
+                  <span className="rewrite-tone">{v.tone || `Version ${i + 1}`}</span>
                   <button
-                    className={`copy-btn ${copied === r.id ? 'copied' : ''}`}
-                    onClick={() => copyToClipboard(r.text, r.id)}
+                    className={`copy-btn ${copied === i ? 'copied' : ''}`}
+                    onClick={() => copyToClipboard(v.bullet, i)}
                   >
-                    {copied === r.id ? '✓ Copied!' : 'Copy'}
+                    {copied === i ? '✓ Copied!' : 'Copy'}
                   </button>
                 </div>
-                <p className="rewrite-text">{r.text}</p>
+                <p className="rewrite-text">{v.bullet}</p>
+                {v.why && <p className="rewrite-why">{v.why}</p>}
               </div>
             ))}
           </div>
         )}
+
       </div>
     </div>
   );

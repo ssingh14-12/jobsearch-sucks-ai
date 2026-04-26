@@ -11,7 +11,7 @@ def rewriter():
 def rewrite():
     data = request.get_json()
     weak_bullet = data.get('weak_bullet', '').strip()
-    writing_style = data.get('writing_style', '').strip()
+    jd_context  = data.get('jd', '').strip()   # optional — tailors rewrite to target role
 
     if not weak_bullet:
         return jsonify({"error": "Paste a bullet point first."}), 400
@@ -19,11 +19,8 @@ def rewrite():
     if len(weak_bullet) < 10:
         return jsonify({"error": "Bullet is too short."}), 400
 
-    if not writing_style:
-        return jsonify({"error": "Describe your writing style first."}), 400
-
     try:
-        result = rewrite_bullet(weak_bullet, writing_style)
+        result = rewrite_bullet(weak_bullet, jd_context)
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": f"Rewrite failed: {str(e)}"}), 500

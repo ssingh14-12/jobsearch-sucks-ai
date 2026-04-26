@@ -37,7 +37,7 @@ def analyze_job_fit(jd_text, company_name):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
 
     # No real key — return mock so UI still works
-    if not api_key or "placeholder" in api_key or len(api_key) < 30:
+    if not api_key or api_key == "your_actual_key_here" or len(api_key) < 30:
         return mock_screener_response(company_name)
 
     client = anthropic.Anthropic(api_key=api_key)
@@ -77,7 +77,7 @@ Job Description:
 """
 
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5",
         max_tokens=1000,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -112,61 +112,72 @@ def mock_screener_response(company_name):
         ]
     }
 
-def rewrite_bullet(weak_bullet, writing_style):
-    """Rewrites a bullet in the user's specified writing style. Returns 3 versions."""
+def rewrite_bullet(weak_bullet, jd_context=""):
+    """
+    Rewrites a bullet in Soumya's voice using Holy Grail rules.
+    jd_context is optional — if provided, tailors the rewrite to the target role.
+    Returns 3 versions.
+    """
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
 
-    if not api_key or "placeholder" in api_key or len(api_key) < 30:
+    if not api_key or api_key == "your_actual_key_here" or len(api_key) < 30:
         return mock_rewriter_response()
 
     client = anthropic.Anthropic(api_key=api_key)
 
+    jd_section = f"""
+TARGET JOB DESCRIPTION (tailor keywords and framing to this role):
+{jd_context}
+""" if jd_context else "No JD provided — rewrite for general use."
+
     prompt = f"""
-You are a resume bullet rewriter. Rewrite the given bullet in the user's writing style.
+You are rewriting a resume bullet for Soumya Singh. You know their full background:
 
-BANNED WORDS — never use these:
-spearheaded, leveraged, utilized, streamlined, synergized, robust, dynamic, 
-cutting-edge, innovative, passionate, driven, results-oriented, detail-oriented, 
-proactive, seamless, managed, coordinated, genuinely, honestly
+{SOUMYA_PROFILE}
 
-RULES:
-- XYZ formula: Accomplished X, measured by Y, by doing Z
-- Outcome first, technical detail second  
-- No "I" — first person implied
-- Max 2 lines per bullet
-- Keep every metric from the original — never remove numbers
-- Strong distinctive action verbs only
-- Sound like a real person, not a formal document
+SOUMYA'S WRITING VOICE (Holy Grail rules — follow exactly):
+- XYZ formula: Accomplished X, as measured by Y, by doing Z
+- Business outcome FIRST, technical detail second
+- No "I" — first person is implied
+- Max 2 lines, ~40 words per bullet
+- Keep EVERY metric from the original — never remove or soften numbers
+- Strong distinctive action verbs only (NOT: managed, coordinated, spearheaded, leveraged,
+  utilized, streamlined, synergized, driven, passionate, innovative, proactive, seamless)
+- Sound like a real person writing about real work — not a formal document
+- No buzzwords, no filler, no AI-sounding phrases
+- Each bullet: one main idea, crystal clear
 
-USER'S WRITING STYLE:
-{writing_style}
+{jd_section}
 
-WEAK BULLET:
+WEAK BULLET TO REWRITE:
 {weak_bullet}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON — no markdown, no extra text:
 {{
-  "issues_found": ["Issue 1 with original", "Issue 2 with original"],
+  "issues_found": ["Specific issue 1 with the original", "Specific issue 2 with the original"],
   "versions": [
     {{
       "bullet": "Rewritten version 1",
-      "why": "One sentence — what changed and why it works"
+      "tone": "e.g. Outcome-first",
+      "why": "One sentence — what changed and why it works better"
     }},
     {{
       "bullet": "Rewritten version 2",
-      "why": "One sentence — what changed and why it works"
+      "tone": "e.g. Technical depth",
+      "why": "One sentence — what changed and why it works better"
     }},
     {{
       "bullet": "Rewritten version 3",
-      "why": "One sentence — what changed and why it works"
+      "tone": "e.g. Stakeholder-focused",
+      "why": "One sentence — what changed and why it works better"
     }}
   ]
 }}
 """
 
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1000,
+        model="claude-sonnet-4-5",
+        max_tokens=1200,
         messages=[{"role": "user", "content": prompt}]
     )
 
@@ -245,7 +256,7 @@ RESUME TEXT:
 """
 
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5",
         max_tokens=1500,
         messages=[{"role": "user", "content": prompt}]
     )
