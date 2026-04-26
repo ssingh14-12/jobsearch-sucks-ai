@@ -7,6 +7,7 @@
 ## 1. What This Project Is
 
 **Product name: Job Search Sucks**
+**Domain: jobsearchsucks.ai**
 
 A web application that makes resume building faster, smarter, and in the user's own voice — not AI voice. Built by **Soumya Singh**. Started as a personal tool, being built into a product others can use (invite-only for now).
 
@@ -108,7 +109,7 @@ Core idea: user uploads their vault of resumes, LinkedIn, and their "Holy Grail"
 | Admin portal | Live version (active users, page tracking) — Phase 2 |
 | Email finding | Hunter.io (free 25/mo) |
 | Resume output | Word .docx default, LaTeX PDF optional |
-| Hosting | Local only through Phase 1 + 2 |
+| Hosting | Local through Phase 1 + 2 → jobsearchsucks.ai in production |
 
 ---
 
