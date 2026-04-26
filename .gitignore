@@ -1,0 +1,38 @@
+# === SECRETS — NEVER COMMIT THESE ===
+.env
+.env.local
+.env.*.local
+
+# === Python ===
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# === Node / React ===
+ui/node_modules/
+ui/dist/
+
+# === IDE ===
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Uploads / user data ===
+uploads/
+*.pdf
+*.docx
+
+# === Claude internal ===
+.claude/docs/
