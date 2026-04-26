@@ -1,0 +1,120 @@
+/* Nav.css — Sticky frosted-glass navigation bar */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  background: rgba(7, 7, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1E1E30;
+}
+
+/* Brand / Logo */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.nav-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00C8E0, #0080ff);
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #07070F;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.nav-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #EEEEF5;
+}
+
+.nav-accent {
+  color: #00C8E0;
+}
+
+/* Page Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5A5A78;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.nav-link:hover {
+  color: #EEEEF5;
+  background: #1E1E30;
+}
+
+.nav-link.active {
+  color: #00C8E0;
+  background: rgba(0, 200, 224, 0.1);
+}
+
+/* Right side — JD pill */
+.nav-right {
+  display: flex;
+  align-items: center;
+  min-width: 160px;
+  justify-content: flex-end;
+}
+
+.nav-jd-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(0, 200, 224, 0.08);
+  border: 1px solid rgba(0, 200, 224, 0.2);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #00C8E0;
+  max-width: 220px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.nav-jd-empty {
+  font-size: 0.75rem;
+  color: #5A5A78;
+}
+
+/* Animated pulse dot (shows when JD is loaded) */
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}

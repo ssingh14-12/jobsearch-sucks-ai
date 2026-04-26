@@ -1,0 +1,10 @@
+/* LinkedInOutreach.css */
+
+.coming-soon-card.blocked {
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.blocked-item {
+  color: #F59E0B;
+  font-weight: 600;
+}
