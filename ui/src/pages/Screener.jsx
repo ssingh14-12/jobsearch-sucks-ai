@@ -18,14 +18,38 @@ import './Screener.css';
 function quickParse(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   let title = '';
-  for (const line of lines.slice(0, 6)) {
+  for (const line of lines.slice(0, 8)) {
     if (line.length > 80 || line.toLowerCase().includes('http')) continue;
-    if (/^(location|salary|about|company)/i.test(line)) continue;
+    if (/^(location|salary|apply|save|full.time|on.site|remote|hybrid)/i.test(line)) continue;
     if (line.length > 4 && line.length < 70) { title = line; break; }
   }
-  const aboutMatch = text.match(/About\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n:])/);
-  const atMatch    = text.match(/\bat\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n])/);
-  const company    = (aboutMatch?.[1] || atMatch?.[1] || '').trim();
+
+  let company = '';
+
+  // LinkedIn format: "Company Name · City, ST"
+  const linkedInLine = text.match(/^([^·\n\d][^·\n]{2,60}?)\s*·\s*[A-Z][a-z]/m);
+  if (linkedInLine) {
+    const candidate = linkedInLine[1].trim();
+    const looksLikeCity = /,\s*[A-Z]{2}$/.test(candidate);
+    if (!looksLikeCity && candidate.toLowerCase() !== title.toLowerCase() && candidate.length > 3)
+      company = candidate;
+  }
+
+  if (!company) {
+    const about = text.match(/About\s+([A-Z][A-Za-z0-9&,\s\-\.]{2,50}?)(?:\s*[-–|,\n:])/);
+    if (about) company = about[1].trim();
+  }
+
+  if (!company) {
+    const dept = text.match(/(?:company|employer|organization|hiring department)[:\s]+([A-Z][A-Za-z0-9&,\s\-\.]{2,50}?)(?:\n|$)/i);
+    if (dept) company = dept[1].trim();
+  }
+
+  if (!company) {
+    const at = text.match(/\bat\s+((?:[A-Z][A-Za-z0-9&\-\.]+\s*){2,5})(?:\s*[-–|,\n·])/);
+    if (at) company = at[1].trim();
+  }
+
   return { title: title || 'Role', company };
 }
 
@@ -61,7 +85,7 @@ export default function Screener() {
        */
       const res  = await api.post('/screener/analyze', {
         jd_text:      jdText,
-        company_name: company || 'Unknown Company',
+        company_name: company,
       });
 
       const data = res.data;
@@ -97,9 +121,9 @@ export default function Screener() {
 
       {/* ── Header ── */}
       <div className="screener-header">
-        <h1 className="screener-title">Job Fit Screener</h1>
+        <h1 className="screener-title">Job Fit <span>Screener</span></h1>
         <p className="screener-sub">
-          Paste a JD. Claude runs your Holy Grail rules and gives you a GO / NO GO in seconds.
+          Paste a JD — Claude runs your Holy Grail rules and gives you a GO / NO GO in seconds.
         </p>
       </div>
 
@@ -111,9 +135,9 @@ export default function Screener() {
           placeholder="Paste the full job description — title, responsibilities, requirements, everything..."
           value={jdText}
           onChange={e => setJdText(e.target.value)}
-          rows={10}
+          rows={9}
         />
-        {error && <p className="screener-error">{error}</p>}
+        {error && <p className="screener-error">⚠ {error}</p>}
         <button className="btn-primary" onClick={handleAnalyze} disabled={loading}>
           {loading && <span className="spinner" />}
           {loading ? 'Analyzing with Claude...' : 'Analyze This JD →'}
@@ -124,37 +148,45 @@ export default function Screener() {
       {result && (
         <div className="screener-results">
 
-          {/* Verdict Banner */}
-          <div className={`verdict-banner verdict-${verdict === 'GO' ? 'go' : 'no_go'}`}>
-            <span className="verdict-label">{verdict}</span>
-            <span className="verdict-sub">{result.decision_reason}</span>
-          </div>
+          {/* ── HERO: Verdict + Score Ring combined ── */}
+          <div className={`result-hero result-hero-${verdict === 'GO' ? 'go' : 'nogo'}`}>
+            <div className="result-hero-inner">
 
-          {/* Score Ring */}
-          <div className="score-ring-wrap">
-            <svg viewBox="0 0 100 100" className="score-ring-svg">
-              <circle cx="50" cy="50" r="36" className="ring-bg" />
-              <circle
-                cx="50" cy="50" r="36"
-                className="ring-fill"
-                stroke={scoreColor}
-                strokeDasharray="226.2"
-                strokeDashoffset={226.2 - (226.2 * score / 10)}
-              />
-            </svg>
-            <div className="score-ring-text">
-              <span className="score-number" style={{ color: scoreColor }}>{score}</span>
-              <span className="score-denom">/10</span>
+              {/* Left: Verdict text */}
+              <div className="verdict-block">
+                <div className="verdict-tag">
+                  <span className="verdict-icon">{verdict === 'GO' ? '✦' : '✕'}</span>
+                  <span className={`verdict-word ${verdict === 'GO' ? 'verdict-go-color' : 'verdict-nogo-color'}`}>
+                    {verdict}
+                  </span>
+                </div>
+                <p className="verdict-reason">{result.decision_reason}</p>
+                <div className="verdict-meta">
+                  <span className="verdict-pill">📄 {result.role_family}</span>
+                  {result.base_resume && (
+                    <span className="verdict-pill">🎯 {result.base_resume}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Score Ring */}
+              <div className="score-ring-wrap">
+                <svg viewBox="0 0 100 100" className="score-ring-svg" style={{ color: scoreColor }}>
+                  <circle cx="50" cy="50" r="36" className="ring-track" />
+                  <circle
+                    cx="50" cy="50" r="36"
+                    className="ring-fill"
+                    stroke={scoreColor}
+                    strokeDasharray="226.2"
+                    strokeDashoffset={226.2 - (226.2 * score / 10)}
+                  />
+                </svg>
+                <div className="score-ring-center">
+                  <span className="score-num" style={{ color: scoreColor }}>{score}</span>
+                  <span className="score-den">/ 10</span>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Role + Resume match */}
-          <div className="result-section">
-            <p className="section-label">Best Resume Match</p>
-            <p className="match-detail">
-              <strong>{result.role_family}</strong>
-              {result.base_resume && <span className="muted"> · {result.base_resume}</span>}
-            </p>
           </div>
 
           {/* Gaps */}
@@ -190,20 +222,19 @@ export default function Screener() {
           {result.red_flags?.length > 0 && (
             <div className="result-section">
               <p className="section-label">Red Flags</p>
-              <ul className="gap-list">
+              <div className="gap-list">
                 {result.red_flags.map((f, i) => (
-                  <li key={i} className="gap-item">
-                    <span className="badge badge-nogo">Flag</span> {f}
-                  </li>
+                  <div key={i} className="red-flag-item">⚑ {f}</div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {/* Visa */}
           {result.visa_flag && result.visa_flag !== 'CLEAR' && (
-            <div className={`visa-flag ${result.visa_flag === 'SKIP' ? 'visa-skip' : ''}`}>
-              {result.visa_flag === 'SKIP' ? '🚫' : '⚠️'} {result.visa_note}
+            <div className={`visa-flag ${result.visa_flag === 'SKIP' ? 'visa-skip-flag' : ''}`}>
+              <span>{result.visa_flag === 'SKIP' ? '🚫' : '⚠️'}</span>
+              <span>{result.visa_note}</span>
             </div>
           )}
 
