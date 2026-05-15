@@ -11,12 +11,32 @@
  *   3. When JD changes, every page that uses it re-renders automatically
  */
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 
 // Step A: Create the context (the whiteboard itself)
 const JDContext = createContext(null);
 
-// Step B: The Provider — wraps the whole app, holds the state
+// ── Default task shapes ──────────────────────────────────────────────────────
+const DEFAULT_RESUME_TASK = {
+  status: 'idle',      // 'idle' | 'loading' | 'done' | 'error'
+  resume: null,        // the full resume JSON from Flask
+  chatHistory: [],     // [{instruction, change_summary, ts}]
+  error: '',
+  version: null,       // e.g. 'V4'
+  seenByUser: false,   // true once the user has visited the page and seen the result
+};
+
+const DEFAULT_OUTREACH_TASK = {
+  status: 'idle',           // 'idle' | 'loading' | 'done' | 'error'
+  targets: [],              // who-to-contact list from Claude
+  peopleByTarget: {},       // { type: [person, ...] }
+  loadingPeople: {},        // { type: bool }
+  peopleNoteByTarget: {},   // { type: 'note string' }
+  error: '',
+  seenByUser: false,
+};
+
+// Step B: The Provider — wraps the whole app, holds ALL shared state
 export function JDProvider({ children }) {
   const [jd, setJd] = useState('');
   const [jobTitle, setJobTitle] = useState('');
@@ -24,9 +44,16 @@ export function JDProvider({ children }) {
   const [postingDate, setPostingDate] = useState('');
 
   // Screener result — saved so Resume Builder can use it without re-analyzing
-  // Contains: decision, match_score, base_resume, role_family, top_gaps, etc.
   const [screenResult, setScreenResult] = useState(null);
 
+  // ── Background task state — survives navigation ──────────────────────────
+  // Resume Builder task (generation + refinement chat)
+  const [resumeTask, setResumeTask] = useState(DEFAULT_RESUME_TASK);
+
+  // LinkedIn Outreach task (target list + people search results)
+  const [outreachTask, setOutreachTask] = useState(DEFAULT_OUTREACH_TASK);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function loadJD({ rawText, title, companyName, date }) {
     setJd(rawText || '');
     setJobTitle(title || '');
@@ -40,12 +67,30 @@ export function JDProvider({ children }) {
     setCompany('');
     setPostingDate('');
     setScreenResult(null);
+    // Reset tasks when JD changes — old resume no longer relevant
+    setResumeTask(DEFAULT_RESUME_TASK);
+    setOutreachTask(DEFAULT_OUTREACH_TASK);
   }
+
+  // Patch just the fields you need (like setState in class components)
+  const patchResumeTask  = useCallback(patch => setResumeTask(prev => ({ ...prev, ...patch })), []);
+  const patchOutreachTask = useCallback(patch => setOutreachTask(prev => ({ ...prev, ...patch })), []);
+
+  // Mark a task as "seen" once the user lands on its page
+  const markResumeSeen   = useCallback(() => setResumeTask(prev => ({ ...prev, seenByUser: true })), []);
+  const markOutreachSeen = useCallback(() => setOutreachTask(prev => ({ ...prev, seenByUser: true })), []);
 
   return (
     <JDContext.Provider value={{
+      // JD fields
       jd, jobTitle, company, postingDate, loadJD, clearJD,
+
+      // Screener
       screenResult, setScreenResult,
+
+      // Background tasks
+      resumeTask,   patchResumeTask,   markResumeSeen,
+      outreachTask, patchOutreachTask, markOutreachSeen,
     }}>
       {children}
     </JDContext.Provider>

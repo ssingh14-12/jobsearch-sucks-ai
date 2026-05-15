@@ -9,7 +9,7 @@
  *   5. Download Word (.docx) or PDF (browser print) when satisfied
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJD } from '../context/JDContext';
 import { api } from '../api';
@@ -80,34 +80,51 @@ function ScoreRing({ score, label }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ResumeBuilder() {
-  const { jd, jobTitle, company, screenResult } = useJD();
+  const {
+    jd, jobTitle, company, screenResult,
+    resumeTask, patchResumeTask, markResumeSeen,
+  } = useJD();
   const navigate = useNavigate();
   const { copied, copy } = useCopy();
   const previewRef = useRef(null);
 
+  // Destructure the shared task state
+  const { status: taskStatus, resume, chatHistory, error, version: taskVersion } = resumeTask;
+  const loading = taskStatus === 'loading';
+
   const recommended = extractVersionKey(screenResult?.base_resume);
-  const [selectedVersion, setSelectedVersion] = useState(recommended || 'V1');
+  // selectedVersion is still local (UI preference, doesn't need to be global)
+  const [selectedVersion, setSelectedVersion] = useState(taskVersion || recommended || 'V1');
 
-  // Resume state
-  const [resume, setResume]       = useState(null);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState('');
+  // Local-only UI state (ephemeral, fine to lose on nav)
   const [downloading, setDownloading] = useState(false);
-
-  // Chat state
-  const [chatInput, setChatInput]       = useState('');
-  const [chatHistory, setChatHistory]   = useState([]);   // [{instruction, change_summary, ts}]
-  const [refining, setRefining]         = useState(false);
-  const [refineError, setRefineError]   = useState('');
+  const [chatInput, setChatInput]     = useState('');
+  const [refining, setRefining]       = useState(false);
+  const [refineError, setRefineError] = useState('');
   const chatEndRef = useRef(null);
+
+  // Mark as seen every time user is on this page and task is done
+  useEffect(() => {
+    if (taskStatus === 'done') markResumeSeen();
+  }, [taskStatus, markResumeSeen]);
+
+  // Helpers to update context task state
+  function setResume(r)      { patchResumeTask({ resume: r }); }
+  function setError(e)       { patchResumeTask({ error: e }); }
+  function setChatHistory(h) { patchResumeTask({ chatHistory: typeof h === 'function' ? h(chatHistory) : h }); }
 
   // ── Generate ───────────────────────────────────────────────────────────────
   async function handleBuild() {
     if (!jd) { setError('Load a job description first — use the bar above.'); return; }
-    setError('');
-    setLoading(true);
-    setResume(null);
-    setChatHistory([]);
+    // Write to context: mark as loading, clear old resume + chat
+    patchResumeTask({
+      status: 'loading',
+      resume: null,
+      chatHistory: [],
+      error: '',
+      version: selectedVersion,
+      seenByUser: true, // user is on this page right now
+    });
 
     try {
       const res = await api.post('/resume/build', {
@@ -115,14 +132,16 @@ export default function ResumeBuilder() {
         resume_version: selectedVersion,
         company_name:   company,
       });
-      setResume(res.data);
+      // Write result to context — survives navigation
+      patchResumeTask({ status: 'done', resume: res.data, error: '' });
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
-      setError(err.code === 'ERR_NETWORK'
-        ? 'Cannot reach Flask — make sure it is running on port 5000.'
-        : `Build failed: ${msg}`);
-    } finally {
-      setLoading(false);
+      patchResumeTask({
+        status: 'error',
+        error: err.code === 'ERR_NETWORK'
+          ? 'Cannot reach Flask — make sure it is running on port 5000.'
+          : `Build failed: ${msg}`,
+      });
     }
   }
 
@@ -140,13 +159,16 @@ export default function ResumeBuilder() {
         conversation_history: chatHistory,
       });
       const updated = res.data;
-      setResume(updated);
-      setChatHistory(prev => [...prev, {
+      const newTurn = {
         instruction: instruction.trim(),
         change_summary: updated.change_summary || 'Applied your changes.',
         ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      }]);
-      // Scroll chat to bottom
+      };
+      // Write both updated resume AND new chat turn to context
+      patchResumeTask({
+        resume: updated,
+        chatHistory: [...chatHistory, newTurn],
+      });
       setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -154,7 +176,7 @@ export default function ResumeBuilder() {
     } finally {
       setRefining(false);
     }
-  }, [resume, chatHistory]);
+  }, [resume, chatHistory, patchResumeTask]);
 
   // ── Download Word ──────────────────────────────────────────────────────────
   async function handleDownloadWord() {
@@ -318,7 +340,7 @@ export default function ResumeBuilder() {
           {company && <span className="rb-topbar-company">— {company}</span>}
         </div>
         <div className="rb-topbar-right">
-          <button className="rb-rebuild-btn" onClick={() => { setResume(null); setChatHistory([]); }}>
+          <button className="rb-rebuild-btn" onClick={() => patchResumeTask({ status: 'idle', resume: null, chatHistory: [], error: '' })}>
             ← Change Version
           </button>
           <button className="rb-build-btn sm" onClick={handleBuild} disabled={loading}>
