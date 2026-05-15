@@ -69,32 +69,34 @@ Core idea: user uploads their vault of resumes, LinkedIn, and their "Holy Grail"
 
 **Phase 1 — Local development, no auth, core features**
 
-### Built (as of Session 4):
-- Flask backend at `localhost:5000`
-- 3 pages with dark UI (vanilla HTML — being migrated to React):
-  - `/screener` — Job Fit Screener
-  - `/rewriter` — Bullet Rewriter
-  - `/ats` — Being REPLACED by LinkedIn Outreach page
-- React + Vite scaffolded at `/ui` (localhost:5173)
-- Flow diagrams at `/flow` and `/flow/v2`
-- **Python environment fully set up:**
-  - `venv/` — isolated Python environment (never use system Python)
-  - `flask-cors` — installed + wired into `app/__init__.py` so React can talk to Flask
-  - `requirements.txt` — full snapshot of every package installed (recreate env with `pip install -r requirements.txt`)
-  - `.env` — secrets file with 5 keys: ANTHROPIC_API_KEY, FLASK_SECRET_KEY, YOUR_EMAIL, FIREBASE_API_KEY (empty slot), HUNTER_API_KEY (empty slot)
-  - `.gitignore` — created at project root; `.env` is protected, never commits to Git
+### ✅ Built (as of Session 5):
+- Flask backend at `localhost:5000` — API mode, returns JSON
+- React + Vite at `localhost:5173` — full structure built
+- **Python environment:** venv, flask-cors wired, requirements.txt, .env (API key set), .gitignore
+- **React skeleton complete:**
+  - `JDContext.jsx` — global JD state shared across all pages (paste once, available everywhere)
+  - `Nav.jsx` — sticky frosted-glass nav, active page highlight, live JD pill with pulse dot
+  - `JDBar.jsx` — expandable on ALL pages (not just Screener). Paste JD from any page inline.
+  - `Screener.jsx` — full UI: JD textarea, score ring, GO/NO GO banner, gaps, strong matches, visa flag, CTA
+  - `BulletRewriter.jsx` — paste bullet, get 3 rewrites with tone labels, copy button, issues found
+  - `ResumeBuilder.jsx` — shell (coming soon card)
+  - `LinkedInOutreach.jsx` — blocked shell (waiting on message examples)
+  - `App.jsx` — BrowserRouter + JDProvider + all 4 routes wired
+  - `api.js` — central axios instance (baseURL in one place for easy production swap)
+- **Flask → React wired:**
+  - Screener calls `/screener/analyze` → Claude runs Holy Grail rules → real GO/NO GO
+  - BulletRewriter calls `/rewriter/rewrite` → Claude rewrites in Soumya's voice
+  - Mock mode works when API key not set
+- **Branding:** "Job Search Sucks" — domain target: jobsearchsucks.fyi (~$7/yr, buy when ready to deploy)
+- **API key:** Set in .env. Anthropic billing ~$0.003 per analysis. $20 = months of personal use.
 
-### Not yet built:
-- React structure (JDContext, Nav, JDBar, 4 page components) — **THIS IS NEXT**
-- react-router-dom + axios installed in /ui — **NEXT STEP**
-- Flask routes converted to return JSON (currently returning HTML templates)
-- Vault upload system
-- Chatbot on screener
-- Resume Builder page
-- LinkedIn Outreach page (BLOCKED — need message examples from Soumya)
-- JD shared via React Context
+### ❌ Not yet built:
+- Resume Builder — side-by-side view, before/after ATS score, Word download
+- LinkedIn Outreach page — BLOCKED (need Soumya's real message examples)
+- Vault upload system (resumes, Holy Grail, LinkedIn PDF upload in app)
+- Chatbot on Screener
 - Firebase Auth (Phase 2)
-- Admin portal (Phase 2)
+- Admin portal — live active users, page tracking (Phase 2)
 
 ---
 
@@ -347,52 +349,52 @@ Fonts: Inter (body) + Syne (brand/headings)
 | 2 | Apr 26, 2026 | Full product redesign. ATS integrated everywhere. 4-page structure. Firebase Auth selected. JD sharing via React Context. LinkedIn Outreach replaces ATS page. Feasibility analysis done. |
 | 3 | Apr 26, 2026 | UI redesigned (dark theme, animations, score ring). Flask confirmed. React confirmed. Node.js installed. React + Vite scaffolded at /ui. Documents read. CLAUDE.md created with real content. 3 clashes flagged and resolved. |
 | 4 | Apr 26, 2026 | Python environment completed end-to-end. flask-cors installed and wired. requirements.txt created. .env updated with all 5 key slots. .gitignore created at project root — .env protected. CLAUDE.md updated and committed to Git. |
+| 5 | May 14, 2026 | Full React skeleton built. 4 pages, Nav, JDBar (expandable on all pages), JDContext, routing. Flask wired to React — Screener and BulletRewriter call real Claude API. api.js central config. Branding locked: Job Search Sucks. Domain target: jobsearchsucks.fyi. Anthropic API key added to .env. App fully runnable at localhost:5173 + localhost:5000. |
 
 ---
 
 ## 11. Next Session — Start Here
 
-**Read CLAUDE.md first (this file). All 3 clashes are already resolved. Environment is done.**
+**Read CLAUDE.md first. Everything below is the exact state to resume from.**
 
-### Step 1 — Verify environment is working
+### Step 1 — Start both servers
 ```bash
-# Activate Python environment
-venv\Scripts\activate       # Windows
-# Should see (venv) in terminal
+# Terminal 1 — Flask
+venv\Scripts\activate
+python run.py
+# Should see: Running on http://127.0.0.1:5000
 
-node -v                     # Should print v24.x.x
-npm -v                      # Should print 11.x.x
-```
-
-### Step 2 — Install React dependencies
-```bash
+# Terminal 2 — React
 cd ui
-npm install react-router-dom axios
-```
-- `react-router-dom` — lets React switch between pages (Screener / Resume Builder / etc.) without reloading
-- `axios` — makes API calls from React to Flask cleaner than raw fetch()
-
-### Step 3 — Build React structure (in this exact order)
-```
-ui/src/
-  context/
-    JDContext.jsx       ← global JD state, shared across all pages
-  components/
-    Nav.jsx             ← top navigation bar
-    JDBar.jsx           ← collapsed JD strip shown on every page
-  pages/
-    Screener.jsx        ← Page 1 (hub)
-    ResumeBuilder.jsx   ← Page 2
-    BulletRewriter.jsx  ← Page 3
-    LinkedInOutreach.jsx← Page 4 (BLOCKED until message examples)
-  App.jsx               ← wire up router + JDContext wrapper
+npm run dev
+# Should see: Local: http://localhost:5173/
 ```
 
-### Step 4 — Convert Flask routes to JSON
-Each Flask route currently returns an HTML template. Convert them to return `jsonify({...})` instead.
-Flask becomes the API brain. React becomes the face.
+### Step 2 — App is live at localhost:5173
+Working right now:
+- Screener: paste JD → real Claude analysis → GO/NO GO, score, gaps
+- Bullet Rewriter: paste bullet → real Claude rewrites in Soumya's voice
+- Nav: all 4 pages, active highlight, JD pill
+- JDBar: expandable JD paste on every page
 
-### Do NOT build LinkedIn Outreach page until Soumya drops real message examples.
+### Step 3 — What to build next (pick one)
+**Option A — Resume Builder (recommended)**
+  - Side-by-side: old resume left, new tailored resume right
+  - Before → After ATS score (e.g. 62 → 88)
+  - Highlights every changed line
+  - Download as Word .docx
+  - Flask route: POST /resume/build
+
+**Option B — LinkedIn Outreach (BLOCKED)**
+  - Cannot build until Soumya drops real message examples
+  - These are needed so Claude can match Soumya's voice exactly
+
+**Option C — Vault Upload**
+  - File upload UI on Screener
+  - Accept: resume PDFs/DOCXs, Holy Grail .docx, LinkedIn PDF
+  - Parse and store in session for Claude to reference
+
+### Do NOT build LinkedIn Outreach page without real message examples from Soumya.
 
 ---
 
