@@ -6,32 +6,134 @@ import re
 # This is Soumya's profile — the brain behind every analysis
 SOUMYA_PROFILE = """
 You are analyzing job descriptions for Soumya Singh:
-- PMP + CSPO certified. MS Engineering Management, UT Austin (Dec 2025). B.Tech CS, Alliance University.
-- F-1 STEM OPT — no sponsorship needed until Oct 2026 H1B lottery deadline.
-- Based in Austin TX, open to relocate.
 
-EXPERIENCE:
-- Saayam For All (Mar 2026-Present): Project/Product role, cloud-native app, 3+ workstreams, 90% on-time delivery, 20+ defects tracked
-- UT Austin Libraries (Jan-Dec 2025): Data/Ops Analyst, Smartsheet, Tableau, 6000+ records, 42% rework reduction, 40% on-time improvement
-- Accenture (Dec 2021-Oct 2023): Business Analyst — BRD/FRD, UAT, Power BI, Azure migration, SAP, Salesforce, Workday, 11+ releases, 50+ stakeholders, 43% escalation reduction
-- Zoho Corporation (Sep-Nov 2021): BA/Presales, CRM, requirements, 13% resolution improvement, 20% retention improvement
-- Bindal Group (Sep 2020-Sep 2021): Ops Analyst, 1000+ SKUs, 3000+ orders/month, 17% dispatch improvement
+CONTACT: soumya3436@gmail.com | (737) 484-7648 | linkedin.com/in/soumya-ssingh | Austin, TX | Open to Relocate
+VISA: F-1 STEM OPT — no sponsorship needed until Oct 2026 H1B lottery deadline.
 
-SKILLS: BRD/FRD, UML, UAT, ETL, Power BI, Tableau, SQL, Azure, SAP ERP, Salesforce, Workday, Jira, Confluence, Smartsheet, Agile/Scrum, CI/CD, Azure DevOps, REST API, Postman
+EDUCATION:
+- MS Engineering Management, UT Austin / Cockrell School of Engineering, Dec 2025
+- B.Tech Computer Science & Engineering, Alliance University, Aug 2020
 
-TARGET ROLES (priority order):
-1. Business Operations Analyst / BizOps
-2. Business Systems Analyst / IT BA
-3. Technical Project Manager / IT PM
-4. Product Owner / Product Manager
-5. Implementation Specialist / SaaS Implementation
-6. Operations Analyst / Strategy & Ops
+CERTIFICATIONS:
+- Project Management Professional (PMP) — PMI, Oct 2025
+- Certified Scrum Product Owner (CSPO) — Scrum Alliance, June 2025
+- Microsoft Certified: Azure Fundamentals (AZ-900) — Microsoft, June 2023
+- Associate Systems Engineering Professional (ASEP) — INCOSE, Aug 2025
+
+EXPERIENCE (use these REAL metrics — never invent numbers):
+Saayam For All (Mar 2026–Present):
+  - 3+ concurrent workstreams, 90% on-time milestone delivery
+  - 20+ defects tracked to resolution with engineering teams
+  - Cloud-native app; Agile ceremonies, RAID logs, milestone schedules, OKR alignment
+  - SQL + Google Analytics for feature adoption tracking; 4 hrs/week reporting saved
+
+UT Austin Libraries (Jan–Dec 2025):
+  - Built Smartsheet PM Command Center; 42% rework reduction; 40% on-time improvement; 20% manual reporting reduction
+  - 6,000+ digital map/catalog records standardized (metadata, data mapping, ingestion)
+  - 500+ metadata records mapped for digital catalog migration
+  - Applied SOC 2, ISO 27001, HIPAA, PCI-DSS governance frameworks
+  - Delivered weekly structured status reports saving 3–5 hrs/week for leadership
+
+Accenture (Dec 2021–Oct 2023):
+  - 11+ enterprise product/SaaS releases across SAP, Salesforce, Workday, Azure-hosted systems
+  - 50+ business and technical stakeholders managed across onshore/offshore teams (US + India)
+  - 43% repeat escalation reduction via RCA and documented runbooks (10 high-impact defect patterns)
+  - 32% post-release defect reduction
+  - 30% deployment reliability improvement via release governance in Azure DevOps (code freezes, hotfix flows, CI/CD)
+  - 25% launch-day issue reduction; 4 hrs/week coordination saved
+  - Power BI dashboards for VP-level stakeholders; OKR/velocity/defect trend reporting
+  - BRD/FRD authoring; UML/process flows; data mapping; UAT scripts; SAFe-aligned delivery
+
+Zoho Corporation (Sep–Nov 2021):
+  - 13% time-to-resolution improvement for Zoho Expense enterprise cases
+  - 20% customer retention improvement
+  - 1,000+ enterprise cases analyzed; patterns converted to user stories and acceptance criteria
+  - Client workshops, SaaS configuration, Zoho Expense implementations
+
+Bindal Group of Companies (Sep 2020–Sep/Aug 2021):
+  - 1,000+ SKUs, 3,000+ orders/month across Amazon, Flipkart, Myntra
+  - 17% on-time dispatch improvement; 15% inventory accuracy improvement
+  - Weekly KPI tracking for inventory, fulfillment, customer issues
+
+PROJECTS & LEADERSHIP:
+- McKinsey Forward Program (Oct–Dec 2025): Invite-only global leadership program; structured problem-solving, stakeholder management, hypothesis-driven analysis
+- Risk-Adjusted Decision Modeling (Dec 2024): Decision trees + NPV analysis, 19% better projected ROI scenario, executive-style briefing
+- Integration Control Center (Mar 2026): End-to-end data pipeline on Olist dataset — PostgreSQL, Apache NiFi, Tableau; BRD, FRD, OpenAPI specs, SQL data model, UAT pack
+- Job Search AI Platform (Apr 2026): Gen AI platform in Python/FastAPI using Claude API for SDLC automation; PLM enablement, process automation
+- Go-to-Market Strategy — 3D-Printed Carbon Fiber Bike (UT Austin, 2024): Simulation-based GTM across 4 global regions; target segments, positioning, pricing tiers with financial modeling
+
+SKILLS (core across all versions):
+Business Analysis: BRD/FRD, UML, User Stories, Acceptance Criteria, UAT, Process Mapping, Gap Analysis, Data Mapping
+Data & BI: SQL, Power BI, Tableau, Excel (advanced), Google Analytics, Snowflake EDW, ETL, KPI definition
+Project & Delivery: Jira, Jira Align, Azure DevOps, Confluence, Smartsheet, MS Project, Miro, Agile/Scrum, SAFe, Kanban, Waterfall, SDLC, RAID, CI/CD
+Enterprise Systems: SAP ERP, Salesforce CRM, Workday, Azure, ServiceNow
+Cloud & Compliance: Azure Cloud Migration, Lift and Shift, SOC 2, ISO 27001, HIPAA, PCI-DSS, AZ-900
+AI Tools: Claude API, Microsoft Copilot, ChatGPT, GitHub Copilot, Mixpanel (familiar)
+
+REAL RESUME VERSIONS IN THE VAULT:
+V1: Business & BI Analyst — for BA, BI Analyst, Data Analyst, Systems Analyst roles
+  Tagline: "Business & BI Analyst | Power BI & Excel Dashboards | Data & Systems Analysis"
+  Key angle: Data mapping, requirements gathering, UML/process flows, Power BI dashboards, data quality, BI reporting
+  UT Austin title: Data and Operations Analyst
+  Accenture title: Business Analyst
+  Zoho title: Business Analyst – Presales & Onboarding
+
+V2: Business Operations Analyst — for BizOps Analyst, Operations Analyst, Strategy & Ops roles
+  Tagline: "Business Operations | Program Execution | Cross-Functional Alignment | Sales Programs"
+  Key angle: SOPs, process controls, data reconciliation, QA checks, exception tracking, quota/performance reporting
+  UT Austin title: Project Manager (DAMS platform)
+  Accenture title: Business Operations Analyst
+  Zoho title: Customer Success Analyst – Zoho Expense
+  Extra cert: ASEP (INCOSE)
+
+V3: SaaS Implementation Consultant — for Implementation Consultant, Solutions Consultant, SaaS PM roles
+  Tagline: "SaaS Implementation Consultant | Client Workshops, Configuration & Change Management"
+  Key angle: Discovery workshops, SaaS configuration, go-live readiness, change management, training & knowledge transfer
+  UT Austin title: SaaS Implementation Consultant (Library Systems)
+  Accenture title: SaaS Product Implementation & Business Analyst
+  Zoho title: Implementation Consultant – Zoho Expense
+
+V4: Technical Program Manager — for TPM, IT PM, Engineering PM, SAFe Agile PM roles
+  Tagline: "Technical Program Manager | SAFe Agile Delivery | Program Governance & OKR Execution"
+  Key angle: SAFe delivery, OKR alignment, RAID logs, quarterly execution planning, program financials, PI Planning
+  UT Austin title: Technical Program Manager
+  Accenture title: Technical Program Manager
+  Extra cert: AZ-900; Extra projects: Integration Control Center, Job Search AI Platform
+
+V5: Product Analyst — for Product Analyst, Product Ops, Feature Analyst, Growth Analyst roles
+  Tagline: "Technology Product Analyst | Feature Adoption | KPIs & Insights"
+  Key angle: Build-measure-learn, SQL for feature adoption, A/B testing, KPI definition, product lifecycle management
+  Saayam title: Product Analyst
+  UT Austin title: Project Analyst
+  Accenture title: Business Analyst / Project Manager
+
+V6: Cloud Project Manager — for Cloud PM, IT PM, DevOps PM, Azure PM, Infrastructure PM roles
+  Tagline: "Cloud Project Manager | Azure & Cloud Migration Delivery | Agile & Cross-Functional Teams"
+  Key angle: Azure migration, Lift & Shift, CI/CD governance, SOC 2 compliance, release governance, cloud security
+  UT Austin title: Technical Project Manager
+  Accenture title: Business Analyst (Azure migration framing)
+  Extra cert: AZ-900; Extra project: Go-to-Market Strategy (3D-Printed Bike)
+
+V7: Scrum Master — for Scrum Master, Agile Coach, RTE, Delivery Lead roles
+  Tagline: "Scrum Master | Agile Delivery | Data & Analytics Teams"
+  Key angle: SAFe ceremonies, impediment removal, backlog readiness, Snowflake/EDW data analytics, continuous improvement
+  Saayam title: Business Analyst (serving as SM)
+  UT Austin title: Data and Operations Analyst
+  Accenture title: Business Analyst (acting Scrum Master)
+
+V8: BizOps Manager — for BizOps Manager, Strategy Ops Lead, Program Manager, Operations Program Manager roles
+  Tagline: "Business Operations | Program Execution | Cross-Functional Alignment | Sales Programs"
+  Key angle: Strategic initiatives, cross-functional alignment, McKinsey frameworks, financial modeling, executive comms
+  Saayam title: Business Operations Manager
+  UT Austin title: Technical Project Manager
+  Accenture title: Strategy and Operations Analyst
 
 VISA RULES:
 - SKIP: JD has explicit no-sponsorship language
-- FLAG: No sponsorship history found — user decides
-- FLAG: Contract roles — OPT compliance check needed
-- FLAG: Staffing agency roles — rarely support H1B
+- CHECK REQUIRED: No sponsorship history found — user decides
+- CHECK REQUIRED: Contract roles — OPT compliance check needed
+- CHECK REQUIRED: Staffing agency roles — rarely support H1B
+- CLEAR: Company has strong public H1B sponsorship history
 """
 
 def analyze_job_fit(jd_text, company_name):
@@ -49,11 +151,14 @@ def analyze_job_fit(jd_text, company_name):
 {SOUMYA_PROFILE}
 
 RESUME VERSIONS — pick the single best match for this JD:
-V1: BA / Data & Systems — for BA, Systems Analyst, IT BA, Data Analyst roles
-V2: ERP PM / SaaS Implementation — for Implementation Specialist, ERP PM, SaaS PM
-V3: Technical PM — for TPM, IT PM, Technical PM, Engineering PM
-V4: BizOps / Strategy — for BizOps Analyst, Strategy & Ops, Program Analyst
-V5: BA / Salesforce & AI — for BA roles at Salesforce shops, CRM-heavy, AI-forward roles
+V1: Business & BI Analyst — BA, BI Analyst, Data Analyst, Systems Analyst, IT BA
+V2: Business Operations Analyst — BizOps Analyst, Operations Analyst, Strategy & Ops, Revenue Ops
+V3: SaaS Implementation Consultant — Implementation Consultant, Solutions Consultant, SaaS PM, Delivery Consultant
+V4: Technical Program Manager — TPM, IT PM, Engineering PM, SAFe PM, Program Manager
+V5: Product Analyst — Product Analyst, Product Ops, Feature Analyst, Growth Analyst
+V6: Cloud Project Manager — Cloud PM, DevOps PM, Azure PM, Infrastructure PM, IT PM (cloud-heavy)
+V7: Scrum Master — Scrum Master, Agile Coach, RTE, Delivery Lead, Agile PM
+V8: BizOps Manager — BizOps Manager, Strategy Ops Lead, Program Operations Manager, Ops Program Manager
 
 SCORING GUIDE (be honest and precise — do not default to 7):
 10  = Perfect match, every requirement met, no gaps
@@ -69,7 +174,7 @@ Analyze this job description and return ONLY a valid JSON object — no markdown
   "decision_reason": "One specific sentence citing the strongest reason for the decision",
   "match_score": <integer 1-10 based on scoring guide above>,
   "role_family": "<exact role title from the JD>",
-  "base_resume": "<one of: V1: BA / Data & Systems | V2: ERP PM / SaaS Impl | V3: Technical PM | V4: BizOps / Strategy | V5: BA / Salesforce & AI>",
+  "base_resume": "<one of: V1: Business & BI Analyst | V2: Business Operations Analyst | V3: SaaS Implementation Consultant | V4: Technical Program Manager | V5: Product Analyst | V6: Cloud Project Manager | V7: Scrum Master | V8: BizOps Manager>",
   "visa_flag": "<CLEAR | CHECK REQUIRED | SKIP>",
   "visa_note": "<specific note about this company's visa sponsorship history — SKIP means hard no-sponsorship in JD>",
   "strong_matches": ["specific skill or experience that matches", "another strong match", "third match"],
@@ -85,7 +190,7 @@ Rules:
 - decision: "GO" if score >= 6, "NO GO" if score <= 4, your call at 5
 - visa_flag: "SKIP" only if JD explicitly says no sponsorship. "CHECK REQUIRED" if unclear. "CLEAR" if company has strong H1B history.
 - match_score: integer only, be honest — do NOT default to 7
-- base_resume: pick exactly one of the 5 versions listed above
+- base_resume: pick exactly one of the 8 versions listed above
 - strong_matches: real specific skills from Soumya's background, not generic phrases
 - top_gaps: real gaps vs this JD's requirements
 
@@ -113,7 +218,7 @@ def mock_screener_response(company_name):
         "decision_reason": "Strong alignment across BA/PM skills, Agile delivery, and data analysis experience.",
         "match_score": 7,
         "role_family": "Business Analyst",
-        "base_resume": "Version 1: Business Analyst / Data & Systems Analysis",
+        "base_resume": "V1: Business & BI Analyst",
         "visa_flag": "CHECK REQUIRED",
         "visa_note": f"Check myvisajobs.com for {company_name} before applying.",
         "strong_matches": [
@@ -242,16 +347,54 @@ def build_resume(jd_text, resume_version, company_name):
     client = anthropic.Anthropic(api_key=api_key)
 
     version_guides = {
-        "V1": "BA / Data & Systems — Emphasize BRD/FRD, UAT, SQL, Power BI, Tableau, data analysis, process improvement, Jira. Lead with data and systems work.",
-        "V2": "ERP PM / SaaS Implementation — Emphasize SAP, Salesforce, Workday, implementation coordination, UAT, change management, go-live. Lead with enterprise system delivery.",
-        "V3": "Technical PM — Emphasize Azure DevOps, CI/CD, release management, cross-functional delivery, sprint planning, Jira, technical stakeholder management. Lead with delivery outcomes.",
-        "V4": "BizOps / Strategy — Emphasize operational metrics, process redesign, dispatch/fulfillment KPIs, Smartsheet, reporting, cross-functional ops. Lead with business impact.",
-        "V5": "BA / Salesforce & AI — Emphasize Salesforce CRM, AI/ML awareness, Workday, REST APIs, Postman, CRM analytics, stakeholder management. Lead with CRM and tech-forward work.",
+        "V1": """Business & BI Analyst — Lead with data and systems work.
+  Job titles to use: UT Austin = 'Data and Operations Analyst', Accenture = 'Business Analyst', Zoho = 'Business Analyst – Presales & Onboarding'
+  Emphasize: BRD/FRD, UML/process flows, data mapping + transformation rules, 6000+ record standardization, Power BI/Tableau/Excel dashboards, SQL, requirements gathering, UAT, Jira/Azure DevOps backlog management, data quality, 40%+ escalation reduction through RCA
+  Skills sections: Business Intelligence (Power BI, KPI tracking, data mapping), Data & Tools (SQL, Excel, Tableau), Analysis & Reporting (reporting reqs, trend analysis, UAT), Business Analysis & Delivery (user stories, process flows, Jira)""",
+
+        "V2": """Business Operations Analyst — Lead with operational impact and process control.
+  Job titles to use: UT Austin = 'Project Manager', Accenture = 'Business Operations Analyst', Zoho = 'Customer Success Analyst – Zoho Expense', Bindal = 'Operations E-Commerce Associate'
+  Emphasize: SOPs and process controls, data reconciliation, QA checks and error tracking, exception investigation, quota/performance reporting, Smartsheet reporting hub, 42% rework reduction, operational data analysis across 11 go-lives, 43% escalation reduction, weekly trend reporting
+  Also include: ASEP/INCOSE certification
+  Skills sections: Business Operations (SOPs, process controls, reconciliation, exception investigation), Automation and Systems (data pipelines, QA checks, workflow automation, runbooks), Tools (Excel, Salesforce, SQL, Python, Smartsheet, Tableau, ServiceNow)""",
+
+        "V3": """SaaS Implementation Consultant — Lead with client-facing implementation and workshops.
+  Job titles to use: UT Austin = 'SaaS Implementation Consultant (Library Systems)', Accenture = 'SaaS Product Implementation & Business Analyst', Zoho = 'Implementation Consultant – Zoho Expense'
+  Emphasize: Discovery workshops and facilitation, requirements elicitation, SaaS configuration, go-live readiness, UAT, change management, training and knowledge transfer, client-facing delivery, release governance (11 releases), 30% deployment reliability improvement, 43% escalation reduction, 20% reporting reduction
+  Skills sections: Implementation & Consulting (workshops, requirements elicitation, SaaS config, change management), Delivery & Operations (project planning, risk management, release governance, KPI tracking), Tools & Data (Jira, Azure DevOps, Smartsheet, Power BI, SQL, ServiceNow)""",
+
+        "V4": """Technical Program Manager — Lead with SAFe delivery, OKRs, and program governance.
+  Job titles to use: Saayam = 'Technical Program Manager', UT Austin = 'Technical Program Manager', Accenture = 'Technical Program Manager', Zoho = 'Business Analyst', Bindal = 'Operations Analyst'
+  Emphasize: SAFe-aligned delivery, OKR alignment, RAID logs, milestone tracking, quarterly execution planning, PI Planning, program financials, Jira Align, Scrum of Scrums, ART Sync, velocity/defect trend Power BI dashboards for VP-level, CI/CD governance (Azure DevOps, Git, code freezes), 30% deployment reliability, 32% post-release defect reduction, 43% escalation reduction
+  Also include: AZ-900 cert; Projects: Integration Control Center (PostgreSQL, Apache NiFi, Tableau, BRD/FRD/OpenAPI/UAT), Job Search AI Platform (Python, FastAPI, Claude API)
+  Skills sections: Program Management (OKR alignment, RAID, release governance, stakeholder reporting), Agile & SAFe (SAFe delivery, Scrum of Scrums, ART Sync, sprint planning, Kanban), Technical & Compliance (Azure DevOps, Git, CI/CD, SOC 2, ISO 27001, SQL, Power BI, Gen AI), Tools (Jira, Jira Align, Confluence, Smartsheet, MS Project, Miro, SharePoint)""",
+
+        "V5": """Product Analyst — Lead with feature adoption, data-driven product decisions.
+  Job titles to use: Saayam = 'Product Analyst', UT Austin = 'Project Analyst', Accenture = 'Business Analyst / Project Manager', Zoho = 'Business Analyst', Bindal = 'Operations Analyst'
+  Emphasize: SQL + Google Analytics for feature adoption metrics, build-measure-learn cycles, A/B and beta testing, KPI definition and tracking, product lifecycle management, go-to-market planning, hypothesis-driven analysis, 4 hrs/week reporting saved, 19% better projected ROI (decision modeling), RAID logs, retrospectives for continuous improvement, 90% on-time delivery
+  Skills sections: Product & Analytics (PLM, KPI tracking, feature adoption, A/B testing, requirements prioritization, GTM), Data & Reporting (SQL, Power BI, Tableau, Google Analytics, Excel), Methodology (Lean, Agile, build-measure-learn, hypothesis validation, RCA), Tools (Jira, Smartsheet, Azure DevOps, Miro, Figma, Mixpanel)""",
+
+        "V6": """Cloud Project Manager — Lead with Azure migration delivery and cloud governance.
+  Job titles to use: Saayam = 'Project Manager', UT Austin = 'Technical Project Manager', Accenture = 'Business Analyst', Zoho = 'Business Analyst', Bindal = 'Operations Analyst'
+  Emphasize: On-prem to Azure cloud migration (Lift and Shift, re-platforming), CI/CD governance (Git, Azure DevOps, code freezes, hotfix flows, release branches), SOC 2 / ISO 27001 / HIPAA / PCI-DSS frameworks, 30% deployment reliability improvement, 42% rework reduction, 40% on-time improvement, 43% escalation reduction, 4 hrs/week saved, cloud-native app delivery at Saayam, risk management and milestone tracking
+  Also include: AZ-900 cert; Project: Go-to-Market Strategy (3D-Printed Carbon Fiber Bike, 4 global regions)
+  Skills sections: Cloud & Technical Delivery (Azure Migration, Lift and Shift, CI/CD, Azure DevOps, Git, GCP, AWS awareness), Project Management (Schedules, Milestones, Risk tracking, Change Control, SAFe, SDLC), Compliance & Security (SOC 2, ISO 27001, HIPAA, PCI-DSS, IT Governance), Tools (Jira, Confluence, Smartsheet, Asana, MS Project, Miro, SharePoint, Power BI, SQL)""",
+
+        "V7": """Scrum Master — Lead with Agile ceremony facilitation and impediment removal.
+  Job titles to use: Saayam = 'Business Analyst (Scrum Master)', UT Austin = 'Data and Operations Analyst', Accenture = 'Business Analyst (acting Scrum Master)', Zoho = 'Business Analyst – Presales', Bindal = 'Operations Analyst'
+  Emphasize: SAFe/Agile ceremony facilitation (sprint planning, standups, reviews, retros), impediment removal and escalation, backlog management and refinement with POs, cross-team dependency management, status reports to VP-level (4-6 stakeholders), Snowflake/EDW data analytics epics and user stories, 10+ retrospectives driving continuous improvement, 90% on-time delivery, 20+ defects tracked to closure
+  Skills sections: Agile & Scrum Master (SAFe, Scrum, sprint facilitation, backlog refinement, impediment removal, dependency management, retrospectives, Kanban), Data & Analytics (SQL, Snowflake, EDW, Power BI, Tableau, Excel, Google Analytics, KPI tracking, data governance), Tools & Delivery (Jira, Confluence, Smartsheet, Azure DevOps, Miro, ChatGPT, GitHub Copilot, UAT, Release coordination)""",
+
+        "V8": """BizOps Manager — Lead with strategic initiative delivery and cross-functional alignment.
+  Job titles to use: Saayam = 'Business Operations Manager', UT Austin = 'Technical Project Manager', Accenture = 'Strategy and Operations Analyst', Zoho = 'Business Analyst – Presales & Onboarding', Bindal = 'Operations Analyst'
+  Emphasize: Cross-functional strategic program execution in ambiguous environments, executive status updates and leadership one-pagers, McKinsey structured problem-solving frameworks (issue trees, hypothesis-driven analysis), financial modeling (NPV, 19% better ROI), Power BI KPI dashboards for VP-level, 43% escalation reduction, 32% post-release defect reduction, 42% rework reduction, 40% on-time improvement, SOP standardization across 3 global teams
+  Projects: McKinsey Forward Program, Risk-Adjusted Decision Modeling
+  Skills sections: Strategy & Operations (cross-functional program execution, strategic initiative delivery, stakeholder alignment, change management, process design, risk mitigation), Analysis & Modeling (data analysis, financial modeling, KPI tracking, Power BI, Tableau, SQL, Excel), Tools & Systems (Jira, Confluence, Smartsheet, Salesforce, CRM tools, Google Workspace, AI tools), Methodologies (Agile, Scrum, Waterfall, SDLC, sprint planning)""",
     }
 
-    # Extract version key (V1-V5) from whatever format comes in
+    # Extract version key (V1-V8) from whatever format comes in
     v_key = "V1"
-    for k in ["V1", "V2", "V3", "V4", "V5"]:
+    for k in ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8"]:
         if k in (resume_version or ""):
             v_key = k
             break
@@ -264,11 +407,11 @@ You are building a tailored, ATS-optimized resume for Soumya Singh.
 CANDIDATE PROFILE:
 {SOUMYA_PROFILE}
 
-ADDITIONAL DETAILS:
-- Email: soumyasingh@utexas.edu
-- Phone: (737) 304-6090
-- LinkedIn: linkedin.com/in/soumyasingh-pmp
-- Portfolio/GitHub: github.com/soumyasingh
+CONTACT (use exactly):
+- Email: soumya3436@gmail.com
+- Phone: (737) 484-7648
+- LinkedIn: linkedin.com/in/soumya-ssingh
+- Location: Austin, TX | Open to Relocate
 
 VERSION FOCUS — {v_key}: {version_focus}
 
@@ -391,9 +534,9 @@ def mock_resume_response(resume_version, company_name):
             "name": "Soumya Singh, PMP, CSPO",
             "tagline": "Business Analyst | Data & Systems | Agile Delivery",
             "location": "Austin, TX | Open to Relocate",
-            "email": "soumyasingh@utexas.edu",
-            "phone": "(737) 304-6090",
-            "linkedin": "linkedin.com/in/soumyasingh-pmp"
+            "email": "soumya3436@gmail.com",
+            "phone": "(737) 484-7648",
+            "linkedin": "linkedin.com/in/soumya-ssingh"
         },
         "summary": f"PMP- and CSPO-certified Business Analyst with 4 years of experience bridging technical teams and business stakeholders across Agile, ERP, and data-driven environments. Proven track record delivering measurable process improvements — 42% rework reduction at UT Austin, 43% escalation drop at Accenture — and ready to bring that discipline to {c}.",
         "experience": [

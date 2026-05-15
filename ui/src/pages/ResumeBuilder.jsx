@@ -16,19 +16,22 @@ import { api } from '../api';
 import JDBar from '../components/JDBar';
 import './ResumeBuilder.css';
 
-// ── Resume version definitions ──────────────────────────────────────────────
+// ── Resume version definitions (matches real vault versions) ─────────────────
 const VERSIONS = [
-  { key: 'V1', label: 'BA / Data & Systems',     desc: 'BA, Systems Analyst, Data Analyst', color: '#00C8E0' },
-  { key: 'V2', label: 'ERP PM / SaaS Impl',       desc: 'Implementation, ERP, SaaS PM',      color: '#8B5CF6' },
-  { key: 'V3', label: 'Technical PM',              desc: 'TPM, IT PM, Engineering PM',         color: '#10B981' },
-  { key: 'V4', label: 'BizOps / Strategy',         desc: 'BizOps, Strategy & Ops, Prog Analyst', color: '#F59E0B' },
-  { key: 'V5', label: 'BA / Salesforce & AI',      desc: 'CRM-heavy, AI-forward, Salesforce BA', color: '#EF4444' },
+  { key: 'V1', label: 'Business & BI Analyst',          desc: 'BA, BI Analyst, Data Analyst, Systems Analyst',        color: '#00C8E0' },
+  { key: 'V2', label: 'Business Operations Analyst',     desc: 'BizOps Analyst, Operations Analyst, Revenue Ops',      color: '#F59E0B' },
+  { key: 'V3', label: 'SaaS Implementation Consultant',  desc: 'Impl Consultant, Solutions Consultant, SaaS PM',       color: '#8B5CF6' },
+  { key: 'V4', label: 'Technical Program Manager',       desc: 'TPM, IT PM, Engineering PM, SAFe PM',                  color: '#10B981' },
+  { key: 'V5', label: 'Product Analyst',                 desc: 'Product Analyst, Product Ops, Growth Analyst',         color: '#EC4899' },
+  { key: 'V6', label: 'Cloud Project Manager',           desc: 'Cloud PM, Azure PM, DevOps PM, Infrastructure PM',     color: '#3B82F6' },
+  { key: 'V7', label: 'Scrum Master',                    desc: 'Scrum Master, Agile Coach, RTE, Delivery Lead',        color: '#EF4444' },
+  { key: 'V8', label: 'BizOps Manager',                  desc: 'BizOps Manager, Strategy Ops Lead, Program Ops Mgr',  color: '#14B8A6' },
 ];
 
-// Pull just the "V1", "V2" etc. key from whatever screenResult.base_resume sends back
+// Pull just the "V1"–"V8" key from whatever screenResult.base_resume sends back
 function extractVersionKey(baseResume) {
   if (!baseResume) return null;
-  const match = baseResume.match(/V[1-5]/);
+  const match = baseResume.match(/V[1-8]/);
   return match ? match[0] : null;
 }
 
