@@ -188,7 +188,11 @@ Analyze this job description and return ONLY a valid JSON object — no markdown
 
 Rules:
 - decision: "GO" if score >= 6, "NO GO" if score <= 4, your call at 5
-- visa_flag: "SKIP" only if JD explicitly says no sponsorship. "CHECK REQUIRED" if unclear. "CLEAR" if company has strong H1B history.
+- visa_flag rules (Soumya is on OPT — needs H1B sponsorship):
+    "SKIP"           → JD explicitly says "no sponsorship", "must be authorized without sponsorship", "US citizen/green card only", etc.
+    "CHECK REQUIRED" → DEFAULT for most jobs. Use when JD is silent on sponsorship, company is a startup/mid-size, or it's a contract/staffing role.
+    "CLEAR"          → ONLY use when JD explicitly says "we sponsor H1B" or "visa sponsorship available" OR company is a confirmed top-100 H1B sponsor (e.g. Infosys, Tata, Wipro, Accenture, Cognizant, Amazon, Google, Microsoft, Meta, Apple, IBM). Do NOT use CLEAR just because a company is large and well-known.
+- visa_note: always give a specific, actionable note (e.g. "Check myvisajobs.com for [Company]" or "JD says no sponsorship — skip this role" or "JD explicitly mentions H1B sponsorship available")
 - match_score: integer only, be honest — do NOT default to 7
 - base_resume: pick exactly one of the 8 versions listed above
 - strong_matches: real specific skills from Soumya's background, not generic phrases

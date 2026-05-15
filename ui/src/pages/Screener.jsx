@@ -232,11 +232,22 @@ export default function Screener() {
             </div>
           )}
 
-          {/* Visa */}
-          {result.visa_flag && result.visa_flag !== 'CLEAR' && (
-            <div className={`visa-flag ${result.visa_flag === 'SKIP' ? 'visa-skip-flag' : ''}`}>
-              <span>{result.visa_flag === 'SKIP' ? '🚫' : '⚠️'}</span>
-              <span>{result.visa_note}</span>
+          {/* Visa — always shown so you never miss a sponsorship issue */}
+          {result.visa_flag && (
+            <div className={`visa-flag visa-flag-${result.visa_flag === 'SKIP' ? 'skip' : result.visa_flag === 'CLEAR' ? 'clear' : 'check'}`}>
+              <span className="visa-icon">
+                {result.visa_flag === 'SKIP'  && '🚫'}
+                {result.visa_flag === 'CHECK REQUIRED' && '⚠️'}
+                {result.visa_flag === 'CLEAR' && '✅'}
+              </span>
+              <div className="visa-body">
+                <span className="visa-label">
+                  {result.visa_flag === 'SKIP'  && 'No Sponsorship — Skip'}
+                  {result.visa_flag === 'CHECK REQUIRED' && 'Visa Check Required'}
+                  {result.visa_flag === 'CLEAR' && 'Sponsorship Likely'}
+                </span>
+                <span className="visa-note">{result.visa_note}</span>
+              </div>
             </div>
           )}
 
