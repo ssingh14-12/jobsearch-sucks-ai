@@ -407,7 +407,8 @@ You are building a tailored, ATS-optimized resume for Soumya Singh.
 CANDIDATE PROFILE:
 {SOUMYA_PROFILE}
 
-CONTACT (use exactly):
+CONTACT (use exactly — never change these):
+- Name on resume: Soumya Singh, PMP, CSPO
 - Email: soumya3436@gmail.com
 - Phone: (737) 484-7648
 - LinkedIn: linkedin.com/in/soumya-ssingh
@@ -426,6 +427,7 @@ HOLY GRAIL RESUME RULES (apply to every bullet):
 8. No buzzwords or AI-sounding filler phrases
 9. One idea per bullet — crystal clear
 10. Tailor keywords from the JD naturally into bullets
+11. NEVER use em dashes (—) inside bullet text. Use a regular hyphen (-) if you need a dash at all.
 
 EXPERIENCE BANK (use these REAL metrics — do not invent numbers):
 Saayam For All: 3+ workstreams, 90% on-time delivery, 20+ defects tracked, cloud-native app
@@ -434,76 +436,113 @@ Accenture: 11+ releases, 50+ stakeholders, 43% escalation reduction, 32% post-re
 Zoho: 13% resolution improvement, 20% retention improvement, CRM
 Bindal Group: 1000+ SKUs, 3000+ orders/month, 17% dispatch improvement
 
-Now build a complete tailored resume. Return ONLY valid JSON — no markdown, no extra text.
+ONE-PAGE CONSTRAINT — CRITICAL:
+This resume MUST fit on a single US Letter page. Strictly obey these bullet limits:
+- Saayam For All: 2-3 bullets MAX
+- UT Austin Libraries: 2 bullets MAX
+- Accenture: 3-4 bullets MAX (most senior, most important)
+- Zoho Corporation: 1-2 bullets
+- Bindal Group: 1 bullet (include only if the version guide calls for ops/e-commerce signals)
+Do NOT include a Professional Summary — this resume has no summary section.
+
+Now build the complete tailored resume. Return ONLY valid JSON — no markdown, no extra text.
 
 {{
   "version_used": "{v_key}",
   "header": {{
     "name": "Soumya Singh, PMP, CSPO",
-    "tagline": "Tailored 6-7 word professional title line for this specific JD",
+    "tagline": "Role Title | Specialty Area | Specialty Area  (pipe-separated, 3 segments, tailored to this JD)",
     "location": "Austin, TX | Open to Relocate",
-    "email": "soumyasingh@utexas.edu",
-    "phone": "(737) 304-6090",
-    "linkedin": "linkedin.com/in/soumyasingh-pmp"
+    "email": "soumya3436@gmail.com",
+    "phone": "(737) 484-7648",
+    "linkedin": "linkedin.com/in/soumya-ssingh"
   }},
-  "summary": "Two sentences — ATS-dense, first-person-free, outcome-driven. Sentence 1: who she is and her strongest qualification. Sentence 2: what she brings specifically to this type of role.",
   "experience": [
     {{
       "company": "Saayam For All",
-      "title": "Technical Business Analyst",
-      "dates": "Mar 2026 – Present",
-      "location": "Austin, TX (Remote)",
-      "bullets": ["4 bullets tailored to the JD using Holy Grail rules and real metrics from the experience bank above"]
+      "title": "<use version guide title for Saayam>",
+      "dates": "Mar 2026 - Present",
+      "location": "Remote",
+      "bullets": ["2-3 bullets — Holy Grail rules, real metrics, NO em dashes"]
     }},
     {{
-      "company": "University of Texas at Austin — Libraries",
-      "title": "Data & Operations Analyst",
-      "dates": "Jan 2025 – Dec 2025",
+      "company": "University of Texas at Austin - Libraries",
+      "title": "<use version guide title for UT Austin>",
+      "dates": "Jan 2025 - Dec 2025",
       "location": "Austin, TX",
-      "bullets": ["4 bullets tailored to the JD using Holy Grail rules"]
+      "bullets": ["2 bullets MAX — real metrics, NO em dashes"]
     }},
     {{
       "company": "Accenture",
-      "title": "Business Analyst",
-      "dates": "Dec 2021 – Oct 2023",
+      "title": "<use version guide title for Accenture>",
+      "dates": "Dec 2021 - Oct 2023",
       "location": "Bengaluru, India",
-      "bullets": ["5 bullets — this is the most impressive role, make them count, keep all metrics"]
+      "bullets": ["3-4 bullets — most impressive role, keep all real metrics, NO em dashes"]
     }},
     {{
       "company": "Zoho Corporation",
-      "title": "Business Analyst, Pre-Sales",
-      "dates": "Sep 2021 – Nov 2021",
+      "title": "<use version guide title for Zoho>",
+      "dates": "Sep 2021 - Nov 2021",
       "location": "Chennai, India",
-      "bullets": ["2 strong bullets with the real metrics"]
+      "bullets": ["1-2 bullets with real metrics, NO em dashes"]
+    }},
+    {{
+      "company": "Bindal Group of Companies",
+      "title": "<use version guide title for Bindal>",
+      "dates": "Sep 2020 - Sep 2021",
+      "location": "Surat, India",
+      "bullets": ["1 bullet with real metrics — only include this job if the version guide specifies ops/e-commerce angle, otherwise omit"]
     }}
   ],
   "education": [
     {{
-      "school": "University of Texas at Austin",
-      "degree": "Master of Science, Engineering Management",
-      "dates": "Aug 2024 – Dec 2025",
-      "note": ""
+      "school": "University of Texas at Austin, Cockrell School of Engineering",
+      "city": "Austin, TX",
+      "degree": "Master of Science in Engineering Management",
+      "dates": "Dec 2025"
     }},
     {{
-      "school": "Alliance University",
-      "degree": "B.Tech, Computer Science",
-      "dates": "Jun 2017 – Jun 2021",
-      "note": ""
+      "school": "Alliance University, Alliance College of Engineering and Design",
+      "city": "Bengaluru, India",
+      "degree": "B.Tech. in Computer Science and Engineering",
+      "dates": "Aug 2020"
+    }}
+  ],
+  "projects": [
+    {{
+      "name": "Integration Control Center - End-to-End Data Pipeline & Systems Design",
+      "date": "Mar 2026",
+      "bullet": "Designing an integration pipeline on the Olist dataset using PostgreSQL, Apache NiFi, and Tableau; deliverables include BRD, FRD, OpenAPI specs, SQL data model, UAT pack, and KPI dashboard."
+    }},
+    {{
+      "name": "Job Search AI Platform - Python, FastAPI & Claude API",
+      "date": "Apr 2026",
+      "bullet": "Building a Gen AI platform in Python and FastAPI using the Claude API to automate SDLC workflows; demonstrates applied AI for delivery acceleration, PLM enablement, and process automation."
     }}
   ],
   "certifications": [
-    "Project Management Professional (PMP) — PMI, Oct 2025",
-    "Certified Scrum Product Owner (CSPO) — Scrum Alliance, Jun 2025"
+    {{
+      "name": "Project Management Professional (PMP®), Project Management Institute",
+      "date": "Oct 2025"
+    }},
+    {{
+      "name": "Certified Scrum Product Owner (CSPO®), Scrum Alliance",
+      "date": "Jun 2025"
+    }},
+    {{
+      "name": "Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft",
+      "date": "Jun 2023"
+    }}
   ],
   "skills": {{
-    "Analysis & Documentation": ["list 4-6 most relevant skills for this JD"],
-    "Data & Reporting": ["list 3-5 most relevant tools for this JD"],
-    "Project & Delivery": ["list 3-5 most relevant tools for this JD"],
-    "Enterprise Systems": ["list 3-4 most relevant for this JD"]
+    "<Category 1 from version guide>": ["skill1", "skill2", "skill3", "skill4", "skill5"],
+    "<Category 2 from version guide>": ["skill1", "skill2", "skill3", "skill4"],
+    "<Category 3 from version guide>": ["skill1", "skill2", "skill3", "skill4"],
+    "<Category 4 from version guide>": ["skill1", "skill2", "skill3", "skill4"]
   }},
-  "ats_score_before": <integer 40-65 — realistic score if generic resume is submitted>,
+  "ats_score_before": <integer 40-65 — realistic score if generic resume submitted>,
   "ats_score_after": <integer 72-92 — realistic score after this tailoring>,
-  "keywords_added": ["5-8 JD keywords that were woven into the resume"],
+  "keywords_added": ["5-8 JD keywords woven into the resume"],
   "tailoring_notes": "One sentence on what was most specifically tailored for this JD and company."
 }}
 
@@ -556,6 +595,8 @@ HOLY GRAIL RULES — apply to any new or changed bullets:
 - Strong action verbs only. BANNED: managed, coordinated, leveraged, utilized, streamlined, spearheaded, helped, assisted, supported, worked on, responsible for
 - One idea per bullet, crystal clear
 - No AI-sounding filler phrases
+- NEVER use em dashes (—) inside bullet text. Use a hyphen (-) if needed.
+- This resume has NO summary/objective section — do not add one under any circumstances
 
 CURRENT RESUME JSON:
 {json.dumps(current_resume, indent=2)}
@@ -566,10 +607,9 @@ USER'S INSTRUCTION: "{instruction}"
 Rules for your response:
 1. Make ONLY the changes the user requested — do not modify anything else
 2. If the user says "add X skill", add it to the most relevant skill category
-3. If the user asks to rewrite a bullet, apply Holy Grail rules
-4. If the user asks to change a summary, keep it 2 sentences, ATS-dense, first-person-free
-5. Return the COMPLETE updated resume in the EXACT same JSON structure as the input
-6. Include a "change_summary" field at the top level describing what you changed in 1 sentence
+3. If the user asks to rewrite a bullet, apply Holy Grail rules strictly
+4. Return the COMPLETE updated resume in the EXACT same JSON structure as the input
+5. Include a "change_summary" field at the top level describing what you changed in 1 sentence
 
 Return ONLY valid JSON — no markdown, no extra text.
 """
@@ -609,79 +649,94 @@ def mock_resume_response(resume_version, company_name):
             "phone": "(737) 484-7648",
             "linkedin": "linkedin.com/in/soumya-ssingh"
         },
-        "summary": f"PMP- and CSPO-certified Business Analyst with 4 years of experience bridging technical teams and business stakeholders across Agile, ERP, and data-driven environments. Proven track record delivering measurable process improvements — 42% rework reduction at UT Austin, 43% escalation drop at Accenture — and ready to bring that discipline to {c}.",
         "experience": [
             {
                 "company": "Saayam For All",
                 "title": "Technical Business Analyst",
-                "dates": "Mar 2026 – Present",
-                "location": "Austin, TX (Remote)",
+                "dates": "Mar 2026 - Present",
+                "location": "Remote",
                 "bullets": [
-                    "Owned end-to-end requirements gathering and backlog grooming across 3+ concurrent workstreams for a cloud-native platform, achieving 90% on-time milestone delivery.",
-                    "Tracked 20+ defects to resolution in Jira, reducing average defect age by coordinating daily with engineering and QA leads.",
-                    "Authored acceptance criteria and user stories directly adopted by development — eliminating mid-sprint scope changes that had delayed 2 prior releases.",
-                    "Facilitated sprint ceremonies and stakeholder demos for a 10-person cross-functional team, maintaining alignment across product, engineering, and customer success."
+                    "Owned requirements gathering and backlog grooming across 3+ concurrent workstreams for a cloud-native platform, hitting 90% on-time milestone delivery.",
+                    "Tracked 20+ defects to resolution in Jira, cutting average defect cycle time by coordinating daily triage with engineering and QA leads."
                 ]
             },
             {
-                "company": "University of Texas at Austin — Libraries",
+                "company": "University of Texas at Austin - Libraries",
                 "title": "Data & Operations Analyst",
-                "dates": "Jan 2025 – Dec 2025",
+                "dates": "Jan 2025 - Dec 2025",
                 "location": "Austin, TX",
                 "bullets": [
-                    "Cut rework in acquisition data processing by 42% by documenting a new data lineage map across 6,000+ records in Smartsheet — adopted org-wide within one quarter.",
-                    "Improved on-time project delivery by 40% by building a Smartsheet dashboard that gave leadership real-time visibility into 12 concurrent initiatives.",
-                    "Built Tableau reports tracking collection usage and budget KPIs, replacing 3 manual Excel processes used by 5 departments.",
-                    "Standardized data entry protocols across teams, reducing inconsistencies that previously caused 1-week delays in monthly reporting cycles."
+                    "Cut rework in acquisition data processing by 42% by documenting a data lineage map across 6,000+ records in Smartsheet, adopted org-wide within one quarter.",
+                    "Improved on-time project delivery by 40% by building a Smartsheet dashboard that gave leadership real-time visibility into 12 concurrent initiatives."
                 ]
             },
             {
                 "company": "Accenture",
                 "title": "Business Analyst",
-                "dates": "Dec 2021 – Oct 2023",
+                "dates": "Dec 2021 - Oct 2023",
                 "location": "Bengaluru, India",
                 "bullets": [
-                    "Authored BRDs and FRDs for 11+ product releases across SAP, Salesforce, and Workday integrations — coordinating requirements sign-off with 50+ business and technical stakeholders.",
+                    "Authored BRDs and FRDs for 11+ product releases across SAP, Salesforce, and Workday integrations, coordinating requirements sign-off with 50+ stakeholders.",
                     "Reduced post-release defects by 32% by designing and executing UAT scripts that caught integration gaps before go-live across 3 enterprise systems.",
-                    "Cut escalation volume by 43% by building a structured issue-triage protocol used by onshore and offshore teams across 6-hour time zones.",
-                    "Drove Azure migration sprint planning by translating business requirements into technical epics in Azure DevOps — delivering 4 milestones on schedule across 18 months.",
-                    "Produced Power BI dashboards consumed by Director-level stakeholders weekly, replacing 4 manual reporting processes and reducing report generation time by 60%."
+                    "Cut escalation volume by 43% by building a structured issue-triage protocol adopted by onshore and offshore teams across a 6-hour time zone gap.",
+                    "Produced Power BI dashboards tracking velocity and defect trends for VP-level stakeholders, replacing 4 manual reporting processes and saving 4 hrs/week."
                 ]
             },
             {
                 "company": "Zoho Corporation",
                 "title": "Business Analyst, Pre-Sales",
-                "dates": "Sep 2021 – Nov 2021",
+                "dates": "Sep 2021 - Nov 2021",
                 "location": "Chennai, India",
                 "bullets": [
-                    "Improved lead-to-demo conversion by 13% by building CRM workflows in Zoho CRM that automated follow-up sequences for 200+ inbound leads per month.",
-                    "Boosted customer retention rate by 20% by identifying and resolving recurring onboarding friction points through analysis of support ticket patterns."
+                    "Improved time-to-resolution by 13% across 1,000+ enterprise cases through tighter escalation tracking and reusable process documentation, contributing to 20% higher customer retention."
                 ]
             }
         ],
         "education": [
             {
-                "school": "University of Texas at Austin",
-                "degree": "Master of Science, Engineering Management",
-                "dates": "Aug 2024 – Dec 2025",
-                "note": ""
+                "school": "University of Texas at Austin, Cockrell School of Engineering",
+                "city": "Austin, TX",
+                "degree": "Master of Science in Engineering Management",
+                "dates": "Dec 2025"
             },
             {
-                "school": "Alliance University",
-                "degree": "B.Tech, Computer Science",
-                "dates": "Jun 2017 – Jun 2021",
-                "note": ""
+                "school": "Alliance University, Alliance College of Engineering and Design",
+                "city": "Bengaluru, India",
+                "degree": "B.Tech. in Computer Science and Engineering",
+                "dates": "Aug 2020"
+            }
+        ],
+        "projects": [
+            {
+                "name": "Integration Control Center - End-to-End Data Pipeline & Systems Design",
+                "date": "Mar 2026",
+                "bullet": "Designing an integration pipeline on the Olist dataset using PostgreSQL, Apache NiFi, and Tableau; deliverables include BRD, FRD, OpenAPI specs, SQL data model, UAT pack, and KPI dashboard."
+            },
+            {
+                "name": "Job Search AI Platform - Python, FastAPI & Claude API",
+                "date": "Apr 2026",
+                "bullet": "Building a Gen AI platform in Python and FastAPI using the Claude API to automate SDLC workflows; demonstrates applied AI for delivery acceleration, PLM enablement, and process automation."
             }
         ],
         "certifications": [
-            "Project Management Professional (PMP) — PMI, Oct 2025",
-            "Certified Scrum Product Owner (CSPO) — Scrum Alliance, Jun 2025"
+            {
+                "name": "Project Management Professional (PMP®), Project Management Institute",
+                "date": "Oct 2025"
+            },
+            {
+                "name": "Certified Scrum Product Owner (CSPO®), Scrum Alliance",
+                "date": "Jun 2025"
+            },
+            {
+                "name": "Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft",
+                "date": "Jun 2023"
+            }
         ],
         "skills": {
-            "Analysis & Documentation": ["BRD / FRD", "User Stories", "UML", "UAT", "Process Mapping", "Gap Analysis"],
-            "Data & Reporting": ["SQL", "Power BI", "Tableau", "Smartsheet", "Snowflake EDW"],
-            "Project & Delivery": ["Jira", "Azure DevOps", "Confluence", "Agile/Scrum", "Kanban"],
-            "Enterprise Systems": ["SAP ERP", "Salesforce CRM", "Workday", "Microsoft Azure"]
+            "Business Analysis & Delivery": ["BRD / FRD", "User Stories", "UML", "UAT", "Process Mapping", "Gap Analysis", "Requirements Elicitation"],
+            "Data & Reporting": ["SQL", "Power BI", "Tableau", "Smartsheet", "Excel", "Snowflake EDW"],
+            "Project & Agile": ["Jira", "Azure DevOps", "Confluence", "Agile/Scrum", "Kanban", "Sprint Planning"],
+            "Enterprise Systems": ["SAP ERP", "Salesforce CRM", "Workday", "Microsoft Azure", "ServiceNow"]
         },
         "ats_score_before": 52,
         "ats_score_after": 81,
