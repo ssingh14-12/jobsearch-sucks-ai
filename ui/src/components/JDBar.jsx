@@ -27,26 +27,50 @@ import './JDBar.css';
 function quickParse(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-  // Try to find job title — usually in first 5 lines, often the shortest bold-ish line
+  // Job title — first short line that isn't a location/url/label
   let title = '';
-  for (const line of lines.slice(0, 6)) {
-    // Skip lines that look like section headers or urls
+  for (const line of lines.slice(0, 8)) {
     if (line.length > 80) continue;
     if (line.toLowerCase().includes('http')) continue;
-    if (line.toLowerCase().startsWith('location') || line.toLowerCase().startsWith('salary')) continue;
-    // First short line is usually the title
+    if (/^(location|salary|apply|save|full.time|on.site|remote|hybrid)/i.test(line)) continue;
     if (line.length > 4 && line.length < 70) {
       title = line.replace(/^(job title|role|position)[:\-\s]*/i, '').trim();
       break;
     }
   }
 
-  // Try to find company name — look for "at CompanyName" or "About CompanyName"
   let company = '';
-  const atMatch = text.match(/\bat\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n])/);
-  const aboutMatch = text.match(/About\s+([A-Z][A-Za-z0-9&\s\-\.]{1,40}?)(?:\s*[-–|,\n:])/);
-  if (aboutMatch) company = aboutMatch[1].trim();
-  else if (atMatch) company = atMatch[1].trim();
+
+  // 1. LinkedIn format: "Company Name · City, ST" — most reliable
+  //    Matches any line where something precedes " · " followed by a capitalised word
+  const linkedInLine = text.match(/^([^·\n\d][^·\n]{2,60}?)\s*·\s*[A-Z][a-z]/m);
+  if (linkedInLine) {
+    const candidate = linkedInLine[1].trim();
+    // reject if it looks like a city/state, a date, or the job title itself
+    const looksLikeCity = /,\s*[A-Z]{2}$/.test(candidate);
+    const isTitle = candidate.toLowerCase() === title.toLowerCase();
+    if (!looksLikeCity && !isTitle && candidate.length > 3) {
+      company = candidate;
+    }
+  }
+
+  // 2. "About [Company]" section header
+  if (!company) {
+    const about = text.match(/About\s+([A-Z][A-Za-z0-9&,\s\-\.]{2,50}?)(?:\s*[-–|,\n:])/);
+    if (about) company = about[1].trim();
+  }
+
+  // 3. "Hiring Department: University XYZ" or explicit label
+  if (!company) {
+    const dept = text.match(/(?:company|employer|organization|hiring department)[:\s]+([A-Z][A-Za-z0-9&,\s\-\.]{2,50}?)(?:\n|$)/i);
+    if (dept) company = dept[1].trim();
+  }
+
+  // 4. Last resort — "at CompanyName" but skip single common words like cities
+  if (!company) {
+    const at = text.match(/\bat\s+((?:[A-Z][A-Za-z0-9&\-\.]+\s*){2,5})(?:\s*[-–|,\n·])/);
+    if (at) company = at[1].trim();
+  }
 
   return { title: title || 'Role', companyName: company || '' };
 }

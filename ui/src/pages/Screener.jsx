@@ -54,7 +54,7 @@ function quickParse(text) {
 }
 
 export default function Screener() {
-  const { jd, loadJD } = useJD();
+  const { jd, loadJD, setScreenResult } = useJD();
   const navigate = useNavigate();
 
   // Pre-fill if JD already loaded from another page
@@ -98,6 +98,8 @@ export default function Screener() {
         date:        '',
       });
 
+      // Save full screener result — Resume Builder reads this automatically
+      setScreenResult(data);
       setResult(data);
     } catch (err) {
       const msg = err.response?.data?.error || err.message;

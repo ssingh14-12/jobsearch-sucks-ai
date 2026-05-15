@@ -18,12 +18,15 @@ const JDContext = createContext(null);
 
 // Step B: The Provider — wraps the whole app, holds the state
 export function JDProvider({ children }) {
-  const [jd, setJd] = useState('');           // raw JD text the user pasted
-  const [jobTitle, setJobTitle] = useState('');    // extracted: "Product Manager"
-  const [company, setCompany] = useState('');      // extracted: "Salesforce"
-  const [postingDate, setPostingDate] = useState(''); // extracted: "Apr 20, 2026"
+  const [jd, setJd] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [postingDate, setPostingDate] = useState('');
 
-  // One function to set everything at once after Claude parses the JD
+  // Screener result — saved so Resume Builder can use it without re-analyzing
+  // Contains: decision, match_score, base_resume, role_family, top_gaps, etc.
+  const [screenResult, setScreenResult] = useState(null);
+
   function loadJD({ rawText, title, companyName, date }) {
     setJd(rawText || '');
     setJobTitle(title || '');
@@ -31,16 +34,19 @@ export function JDProvider({ children }) {
     setPostingDate(date || '');
   }
 
-  // Clear everything (e.g. user starts fresh)
   function clearJD() {
     setJd('');
     setJobTitle('');
     setCompany('');
     setPostingDate('');
+    setScreenResult(null);
   }
 
   return (
-    <JDContext.Provider value={{ jd, jobTitle, company, postingDate, loadJD, clearJD }}>
+    <JDContext.Provider value={{
+      jd, jobTitle, company, postingDate, loadJD, clearJD,
+      screenResult, setScreenResult,
+    }}>
       {children}
     </JDContext.Provider>
   );
