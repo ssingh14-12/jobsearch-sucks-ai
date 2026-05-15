@@ -2,21 +2,22 @@
  * ResumeBuilder.jsx — Page 2: Resume Builder
  *
  * Flow:
- *   1. Reads JD + screener result from JDContext (no re-paste needed)
- *   2. User picks resume version (V1–V5), pre-selected from screener
- *   3. Hits Flask /resume/build → Claude builds full tailored resume
- *   4. Shows ATS before→after, full resume sections, copy buttons
- *   5. Download as Word .docx
+ *   1. JD + screener result auto-loaded from JDContext
+ *   2. User picks version (V1–V8), hits Generate
+ *   3. Side-by-side: LEFT = live document preview, RIGHT = chat + controls
+ *   4. Chat box lets user refine with natural language — preview updates live
+ *   5. Download Word (.docx) or PDF (browser print) when satisfied
  */
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJD } from '../context/JDContext';
 import { api } from '../api';
 import JDBar from '../components/JDBar';
+import ResumePreview from '../components/ResumePreview';
 import './ResumeBuilder.css';
 
-// ── Resume version definitions (matches real vault versions) ─────────────────
+// ── Version definitions ──────────────────────────────────────────────────────
 const VERSIONS = [
   { key: 'V1', label: 'Business & BI Analyst',          desc: 'BA, BI Analyst, Data Analyst, Systems Analyst',        color: '#00C8E0' },
   { key: 'V2', label: 'Business Operations Analyst',     desc: 'BizOps Analyst, Operations Analyst, Revenue Ops',      color: '#F59E0B' },
@@ -28,14 +29,22 @@ const VERSIONS = [
   { key: 'V8', label: 'BizOps Manager',                  desc: 'BizOps Manager, Strategy Ops Lead, Program Ops Mgr',  color: '#14B8A6' },
 ];
 
-// Pull just the "V1"–"V8" key from whatever screenResult.base_resume sends back
+// Quick-action prompts for the chat
+const QUICK_ACTIONS = [
+  'Make the Accenture bullets more concise',
+  'Add a stronger opening to the summary',
+  'Emphasize stakeholder management more',
+  'Make bullets more metric-heavy',
+  'Rewrite the Saayam bullets for this JD',
+  'Shorten bullets to under 35 words each',
+];
+
 function extractVersionKey(baseResume) {
   if (!baseResume) return null;
-  const match = baseResume.match(/V[1-8]/);
+  const match = (baseResume || '').match(/V[1-8]/);
   return match ? match[0] : null;
 }
 
-// ── Copy-to-clipboard hook ───────────────────────────────────────────────────
 function useCopy() {
   const [copied, setCopied] = useState(null);
   function copy(text, id) {
@@ -47,24 +56,18 @@ function useCopy() {
   return { copied, copy };
 }
 
-// ── ATS score ring component ─────────────────────────────────────────────────
-function ScoreRing({ score, label, delay = '0s' }) {
+// ── ATS Ring ─────────────────────────────────────────────────────────────────
+function ScoreRing({ score, label }) {
   const color  = score >= 80 ? '#10B981' : score >= 65 ? '#F59E0B' : '#EF4444';
-  const radius = 30;
+  const radius = 28;
   const circ   = 2 * Math.PI * radius;
   const offset = circ - (circ * score / 100);
-
   return (
-    <div className="ats-ring-wrap" style={{ animationDelay: delay }}>
-      <svg viewBox="0 0 80 80" className="ats-ring-svg" style={{ color }}>
-        <circle cx="40" cy="40" r={radius} className="ats-ring-track" />
-        <circle
-          cx="40" cy="40" r={radius}
-          className="ats-ring-fill"
-          stroke={color}
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-        />
+    <div className="ats-ring-wrap">
+      <svg viewBox="0 0 72 72" className="ats-ring-svg" style={{ color }}>
+        <circle cx="36" cy="36" r={radius} className="ats-ring-track" />
+        <circle cx="36" cy="36" r={radius} className="ats-ring-fill"
+          stroke={color} strokeDasharray={circ} strokeDashoffset={offset} />
       </svg>
       <div className="ats-ring-center">
         <span className="ats-ring-num" style={{ color }}>{score}</span>
@@ -75,45 +78,36 @@ function ScoreRing({ score, label, delay = '0s' }) {
   );
 }
 
-// ── Section copy card ────────────────────────────────────────────────────────
-function SectionCard({ title, children, copyText, copyId, copied, onCopy }) {
-  return (
-    <div className="rb-section-card">
-      <div className="rb-section-header">
-        <span className="rb-section-title">{title}</span>
-        {copyText && (
-          <button
-            className={`rb-copy-btn ${copied === copyId ? 'copied' : ''}`}
-            onClick={() => onCopy(copyText, copyId)}
-          >
-            {copied === copyId ? '✓ Copied' : 'Copy'}
-          </button>
-        )}
-      </div>
-      <div className="rb-section-body">{children}</div>
-    </div>
-  );
-}
-
-// ── Main page ────────────────────────────────────────────────────────────────
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function ResumeBuilder() {
   const { jd, jobTitle, company, screenResult } = useJD();
   const navigate = useNavigate();
   const { copied, copy } = useCopy();
+  const previewRef = useRef(null);
 
-  // Pre-select version from screener if available
-  const recommended = screenResult ? extractVersionKey(screenResult.base_resume) : null;
+  const recommended = extractVersionKey(screenResult?.base_resume);
   const [selectedVersion, setSelectedVersion] = useState(recommended || 'V1');
-  const [loading, setLoading]  = useState(false);
-  const [resume, setResume]    = useState(null);
-  const [error, setError]      = useState('');
+
+  // Resume state
+  const [resume, setResume]       = useState(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
   const [downloading, setDownloading] = useState(false);
 
+  // Chat state
+  const [chatInput, setChatInput]       = useState('');
+  const [chatHistory, setChatHistory]   = useState([]);   // [{instruction, change_summary, ts}]
+  const [refining, setRefining]         = useState(false);
+  const [refineError, setRefineError]   = useState('');
+  const chatEndRef = useRef(null);
+
+  // ── Generate ───────────────────────────────────────────────────────────────
   async function handleBuild() {
     if (!jd) { setError('Load a job description first — use the bar above.'); return; }
     setError('');
     setLoading(true);
     setResume(null);
+    setChatHistory([]);
 
     try {
       const res = await api.post('/resume/build', {
@@ -124,17 +118,46 @@ export default function ResumeBuilder() {
       setResume(res.data);
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
-      if (err.code === 'ERR_NETWORK') {
-        setError('Cannot reach Flask — make sure it is running on port 5000.');
-      } else {
-        setError(`Build failed: ${msg}`);
-      }
+      setError(err.code === 'ERR_NETWORK'
+        ? 'Cannot reach Flask — make sure it is running on port 5000.'
+        : `Build failed: ${msg}`);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDownload() {
+  // ── Refine via chat ────────────────────────────────────────────────────────
+  const handleRefine = useCallback(async (instruction) => {
+    if (!instruction.trim() || !resume) return;
+    setRefineError('');
+    setRefining(true);
+    setChatInput('');
+
+    try {
+      const res = await api.post('/resume/refine', {
+        resume,
+        instruction: instruction.trim(),
+        conversation_history: chatHistory,
+      });
+      const updated = res.data;
+      setResume(updated);
+      setChatHistory(prev => [...prev, {
+        instruction: instruction.trim(),
+        change_summary: updated.change_summary || 'Applied your changes.',
+        ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }]);
+      // Scroll chat to bottom
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setRefineError(`Refinement failed: ${msg}`);
+    } finally {
+      setRefining(false);
+    }
+  }, [resume, chatHistory]);
+
+  // ── Download Word ──────────────────────────────────────────────────────────
+  async function handleDownloadWord() {
     if (!resume) return;
     setDownloading(true);
     try {
@@ -142,7 +165,6 @@ export default function ResumeBuilder() {
         resume,
         company: company || 'Resume',
       }, { responseType: 'blob' });
-
       const url  = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href  = url;
@@ -152,32 +174,41 @@ export default function ResumeBuilder() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      setError('Download failed — check Flask is running.');
+      setError('Word download failed — check Flask is running.');
     } finally {
       setDownloading(false);
     }
   }
 
-  // ── Render helpers ───────────────────────────────────────────────────────
-  function bulletsCopyText(job) {
-    return job.bullets.map(b => `• ${b}`).join('\n');
-  }
-
-  function allExpCopyText() {
-    return (resume?.experience || []).map(job =>
-      `${job.title} — ${job.company} (${job.dates})\n${job.bullets.map(b => `• ${b}`).join('\n')}`
-    ).join('\n\n');
-  }
-
-  function skillsCopyText() {
-    return Object.entries(resume?.skills || {})
-      .map(([cat, items]) => `${cat}: ${items.join(', ')}`)
-      .join('\n');
+  // ── Download PDF via browser print ────────────────────────────────────────
+  function handleDownloadPDF() {
+    if (!previewRef.current) return;
+    const content  = previewRef.current.innerHTML;
+    const printWin = window.open('', '_blank', 'width=900,height=700');
+    printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Resume — ${company || 'Soumya Singh'}</title>
+  <link rel="stylesheet" href="${window.location.origin}/src/components/ResumePreview.css">
+  <style>
+    body { margin: 0; padding: 0; background: white; }
+    @media print {
+      body { margin: 0; }
+      @page { margin: 0.5in; size: letter portrait; }
+    }
+  </style>
+</head>
+<body>
+  <div class="rp-page">${content}</div>
+  <script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`);
+    printWin.document.close();
   }
 
   const versionObj = VERSIONS.find(v => v.key === selectedVersion) || VERSIONS[0];
 
-  // ── No JD state ──────────────────────────────────────────────────────────
+  // ── No JD ──────────────────────────────────────────────────────────────────
   if (!jd) {
     return (
       <div className="page-layout">
@@ -186,268 +217,240 @@ export default function ResumeBuilder() {
           <div className="rb-no-jd">
             <div className="rb-no-jd-icon">📋</div>
             <h2>No Job Description Loaded</h2>
-            <p>Paste a JD in the bar above, or go to the Screener first to analyze a role and get a version recommendation.</p>
-            <button className="rb-btn-secondary" onClick={() => navigate('/screener')}>
-              Go to Screener →
-            </button>
+            <p>Paste a JD in the bar above, or run the Screener first to get a version recommendation.</p>
+            <button className="rb-btn-secondary" onClick={() => navigate('/screener')}>Go to Screener →</button>
           </div>
         </div>
       </div>
     );
   }
 
-  // ── Main render ──────────────────────────────────────────────────────────
+  // ── Pre-generate view ──────────────────────────────────────────────────────
+  if (!resume) {
+    return (
+      <div className="page-layout">
+        <JDBar />
+        <div className="page-content rb-page">
+
+          <div className="rb-header">
+            <h1 className="rb-title">Resume <span>Builder</span></h1>
+            <p className="rb-sub">
+              Tailoring for <strong>{jobTitle || 'this role'}</strong>
+              {company ? ` at ${company}` : ''} — Holy Grail rules on every bullet.
+            </p>
+          </div>
+
+          {/* Version selector */}
+          <div className="rb-version-wrap">
+            <p className="rb-section-label">
+              Resume Version
+              {recommended && (
+                <span className="rb-recommended-badge">✦ Screener recommends {recommended}</span>
+              )}
+            </p>
+            <div className="rb-version-grid">
+              {VERSIONS.map(v => (
+                <button
+                  key={v.key}
+                  className={`rb-version-btn ${selectedVersion === v.key ? 'active' : ''}`}
+                  style={selectedVersion === v.key ? { borderColor: v.color, color: v.color } : {}}
+                  onClick={() => setSelectedVersion(v.key)}
+                >
+                  <span className="rb-version-key">{v.key}</span>
+                  <span className="rb-version-label">{v.label}</span>
+                  <span className="rb-version-desc">{v.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Screener context */}
+          {screenResult && (
+            <div className="rb-context-banner">
+              <div className="rb-context-item">
+                <span className="rb-context-key">Screener score</span>
+                <span className="rb-context-val" style={{
+                  color: screenResult.match_score >= 8 ? '#10B981' : screenResult.match_score >= 6 ? '#F59E0B' : '#EF4444'
+                }}>{screenResult.match_score}/10</span>
+              </div>
+              <div className="rb-context-sep" />
+              <div className="rb-context-item">
+                <span className="rb-context-key">Role family</span>
+                <span className="rb-context-val">{screenResult.role_family}</span>
+              </div>
+              <div className="rb-context-sep" />
+              <div className="rb-context-item">
+                <span className="rb-context-key">Recommended</span>
+                <span className="rb-context-val" style={{ color: versionObj.color }}>{screenResult.base_resume}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Generate button */}
+          <div className="rb-build-wrap">
+            {error && <p className="rb-error">⚠ {error}</p>}
+            <button className="rb-build-btn" onClick={handleBuild} disabled={loading}>
+              {loading && <span className="spinner" />}
+              {loading ? 'Building with Claude...' : `Build ${selectedVersion} Resume →`}
+            </button>
+            {loading && (
+              <p className="rb-loading-hint">
+                Claude is writing tailored bullets with your Holy Grail rules — usually 15–25 seconds.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Post-generate: side-by-side view ──────────────────────────────────────
   return (
     <div className="page-layout">
       <JDBar />
-      <div className="page-content rb-page">
 
-        {/* ── Header ── */}
-        <div className="rb-header">
-          <h1 className="rb-title">Resume <span>Builder</span></h1>
-          <p className="rb-sub">
-            Tailoring for <strong>{jobTitle || 'this role'}</strong>
-            {company ? ` at ${company}` : ''} — Holy Grail rules applied to every bullet.
-          </p>
+      {/* Top bar — version info + rebuild */}
+      <div className="rb-topbar">
+        <div className="rb-topbar-left">
+          <span className="rb-topbar-version" style={{ color: versionObj.color }}>
+            {selectedVersion}: {versionObj.label}
+          </span>
+          {company && <span className="rb-topbar-company">— {company}</span>}
         </div>
-
-        {/* ── Version selector ── */}
-        <div className="rb-version-wrap">
-          <p className="rb-section-label">
-            Resume Version
-            {recommended && (
-              <span className="rb-recommended-badge">
-                ✦ Screener recommends {recommended}
-              </span>
-            )}
-          </p>
-          <div className="rb-version-grid">
-            {VERSIONS.map(v => (
-              <button
-                key={v.key}
-                className={`rb-version-btn ${selectedVersion === v.key ? 'active' : ''}`}
-                style={selectedVersion === v.key ? { borderColor: v.color, color: v.color } : {}}
-                onClick={() => setSelectedVersion(v.key)}
-              >
-                <span className="rb-version-key">{v.key}</span>
-                <span className="rb-version-label">{v.label}</span>
-                <span className="rb-version-desc">{v.desc}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Screener context banner ── */}
-        {screenResult && (
-          <div className="rb-context-banner">
-            <div className="rb-context-item">
-              <span className="rb-context-key">Screener score</span>
-              <span className="rb-context-val" style={{
-                color: screenResult.match_score >= 8 ? '#10B981' : screenResult.match_score >= 6 ? '#F59E0B' : '#EF4444'
-              }}>{screenResult.match_score}/10</span>
-            </div>
-            <div className="rb-context-sep" />
-            <div className="rb-context-item">
-              <span className="rb-context-key">Role family</span>
-              <span className="rb-context-val">{screenResult.role_family}</span>
-            </div>
-            <div className="rb-context-sep" />
-            <div className="rb-context-item">
-              <span className="rb-context-key">Recommended version</span>
-              <span className="rb-context-val" style={{ color: versionObj.color }}>{screenResult.base_resume}</span>
-            </div>
-          </div>
-        )}
-
-        {/* ── Build button ── */}
-        <div className="rb-build-wrap">
-          {error && <p className="rb-error">⚠ {error}</p>}
-          <button className="rb-build-btn" onClick={handleBuild} disabled={loading}>
-            {loading && <span className="spinner" />}
-            {loading ? 'Building with Claude...' : `Build ${selectedVersion} Resume for ${company || 'this role'} →`}
+        <div className="rb-topbar-right">
+          <button className="rb-rebuild-btn" onClick={() => { setResume(null); setChatHistory([]); }}>
+            ← Change Version
           </button>
-          {loading && (
-            <p className="rb-loading-hint">
-              Claude is writing tailored bullets using your Holy Grail rules — usually 15–25 seconds.
-            </p>
-          )}
+          <button className="rb-build-btn sm" onClick={handleBuild} disabled={loading}>
+            {loading && <span className="spinner sm" />}
+            {loading ? 'Rebuilding...' : 'Regenerate'}
+          </button>
+        </div>
+      </div>
+
+      {/* Side-by-side layout */}
+      <div className="rb-split">
+
+        {/* LEFT: Document preview */}
+        <div className="rb-preview-panel">
+          <div className="rb-preview-header">
+            <span className="rb-preview-label">Document Preview</span>
+            <div className="rb-preview-actions">
+              <button className="rb-dl-btn word" onClick={handleDownloadWord} disabled={downloading}>
+                {downloading ? '...' : '⬇ Word'}
+              </button>
+              <button className="rb-dl-btn pdf" onClick={handleDownloadPDF}>
+                ⬇ PDF
+              </button>
+            </div>
+          </div>
+          <div className="rb-preview-scroll">
+            <div className="rb-preview-paper">
+              <ResumePreview resume={resume} ref={previewRef} />
+            </div>
+          </div>
         </div>
 
-        {/* ── Results ── */}
-        {resume && (
-          <div className="rb-results">
+        {/* RIGHT: Chat + ATS + info */}
+        <div className="rb-right-panel">
 
-            {/* ── ATS Score Cards ── */}
-            <div className="rb-ats-card">
-              <p className="rb-section-label">ATS Score</p>
-              <div className="rb-ats-rings">
-                <ScoreRing score={resume.ats_score_before} label="Before" delay="0s" />
-                <div className="rb-ats-arrow">→</div>
-                <ScoreRing score={resume.ats_score_after}  label="After"  delay="0.15s" />
-              </div>
+          {/* ATS scores */}
+          <div className="rb-ats-mini">
+            <ScoreRing score={resume.ats_score_before} label="Before" />
+            <div className="rb-ats-arrow">→</div>
+            <ScoreRing score={resume.ats_score_after}  label="After" />
+            <div className="rb-ats-info">
               {resume.keywords_added?.length > 0 && (
-                <div className="rb-keywords-row">
-                  <span className="rb-keywords-label">Keywords added:</span>
-                  <div className="rb-keywords-chips">
-                    {resume.keywords_added.map((kw, i) => (
-                      <span key={i} className="rb-keyword-chip">{kw}</span>
-                    ))}
-                  </div>
+                <div className="rb-kw-chips">
+                  {resume.keywords_added.map((kw, i) => (
+                    <span key={i} className="rb-kw-chip">{kw}</span>
+                  ))}
                 </div>
               )}
               {resume.tailoring_notes && (
                 <p className="rb-tailoring-note">✦ {resume.tailoring_notes}</p>
               )}
             </div>
+          </div>
 
-            {/* ── Header ── */}
-            <SectionCard
-              title="Header"
-              copyId="header"
-              copyText={[
-                resume.header?.name,
-                resume.header?.tagline,
-                [resume.header?.email, resume.header?.phone, resume.header?.linkedin, resume.header?.location].filter(Boolean).join('  |  ')
-              ].filter(Boolean).join('\n')}
-              copied={copied}
-              onCopy={copy}
-            >
-              <div className="rb-header-preview">
-                <p className="rb-preview-name">{resume.header?.name}</p>
-                {resume.header?.tagline && (
-                  <p className="rb-preview-tagline">{resume.header.tagline}</p>
-                )}
-                <p className="rb-preview-contact">
-                  {[resume.header?.email, resume.header?.phone, resume.header?.linkedin, resume.header?.location]
-                    .filter(Boolean)
-                    .join('  ·  ')}
-                </p>
+          {/* Chat refinement */}
+          <div className="rb-chat-panel">
+            <p className="rb-chat-label">Refine with Claude</p>
+
+            {/* Quick action chips */}
+            <div className="rb-quick-chips">
+              {QUICK_ACTIONS.map((q, i) => (
+                <button key={i} className="rb-quick-chip" onClick={() => handleRefine(q)} disabled={refining}>
+                  {q}
+                </button>
+              ))}
+            </div>
+
+            {/* Chat history */}
+            {chatHistory.length > 0 && (
+              <div className="rb-chat-history">
+                {chatHistory.map((h, i) => (
+                  <div key={i} className="rb-chat-turn">
+                    <div className="rb-chat-user">
+                      <span className="rb-chat-bubble user">{h.instruction}</span>
+                      <span className="rb-chat-ts">{h.ts}</span>
+                    </div>
+                    <div className="rb-chat-claude">
+                      <span className="rb-chat-bubble claude">✦ {h.change_summary}</span>
+                    </div>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
               </div>
-            </SectionCard>
-
-            {/* ── Summary ── */}
-            {resume.summary && (
-              <SectionCard
-                title="Professional Summary"
-                copyId="summary"
-                copyText={resume.summary}
-                copied={copied}
-                onCopy={copy}
-              >
-                <p className="rb-summary-text">{resume.summary}</p>
-              </SectionCard>
             )}
 
-            {/* ── Experience ── */}
-            <SectionCard
-              title="Experience"
-              copyId="exp-all"
-              copyText={allExpCopyText()}
-              copied={copied}
-              onCopy={copy}
-            >
-              <div className="rb-exp-list">
-                {(resume.experience || []).map((job, ji) => (
-                  <div key={ji} className="rb-job">
-                    <div className="rb-job-header">
-                      <div className="rb-job-meta">
-                        <span className="rb-job-title">{job.title}</span>
-                        <span className="rb-job-sep">—</span>
-                        <span className="rb-job-company">{job.company}</span>
-                        <span className="rb-job-dates">{job.dates}</span>
-                        {job.location && <span className="rb-job-location">· {job.location}</span>}
-                      </div>
-                      <button
-                        className={`rb-copy-btn sm ${copied === `exp-${ji}` ? 'copied' : ''}`}
-                        onClick={() => copy(bulletsCopyText(job), `exp-${ji}`)}
-                      >
-                        {copied === `exp-${ji}` ? '✓' : 'Copy'}
-                      </button>
-                    </div>
-                    <ul className="rb-bullets">
-                      {job.bullets.map((b, bi) => (
-                        <li key={bi} className="rb-bullet">{b}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
+            {refineError && <p className="rb-error">{refineError}</p>}
 
-            {/* ── Skills ── */}
-            <SectionCard
-              title="Skills"
-              copyId="skills"
-              copyText={skillsCopyText()}
-              copied={copied}
-              onCopy={copy}
-            >
-              <div className="rb-skills-grid">
-                {Object.entries(resume.skills || {}).map(([cat, items], i) => (
-                  <div key={i} className="rb-skill-group">
-                    <p className="rb-skill-cat">{cat}</p>
-                    <div className="rb-skill-chips">
-                      {items.map((s, si) => (
-                        <span key={si} className="rb-skill-chip">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-
-            {/* ── Education + Certs in a row ── */}
-            <div className="rb-two-col">
-              <SectionCard
-                title="Education"
-                copyId="education"
-                copyText={(resume.education || []).map(e =>
-                  `${e.degree} — ${e.school} (${e.dates})${e.note ? ' · ' + e.note : ''}`
-                ).join('\n')}
-                copied={copied}
-                onCopy={copy}
-              >
-                {(resume.education || []).map((edu, i) => (
-                  <div key={i} className="rb-edu-item">
-                    <p className="rb-edu-degree">{edu.degree}</p>
-                    <p className="rb-edu-school">{edu.school}</p>
-                    <p className="rb-edu-dates">{edu.dates}{edu.note ? ` · ${edu.note}` : ''}</p>
-                  </div>
-                ))}
-              </SectionCard>
-
-              <SectionCard
-                title="Certifications"
-                copyId="certs"
-                copyText={(resume.certifications || []).join('\n')}
-                copied={copied}
-                onCopy={copy}
-              >
-                <ul className="rb-cert-list">
-                  {(resume.certifications || []).map((c, i) => (
-                    <li key={i} className="rb-cert-item">{c}</li>
-                  ))}
-                </ul>
-              </SectionCard>
-            </div>
-
-            {/* ── Download ── */}
-            <div className="rb-download-wrap">
+            {/* Input */}
+            <div className="rb-chat-input-wrap">
+              <textarea
+                className="rb-chat-input"
+                placeholder='e.g. "Add Workato to skills" or "Rewrite Accenture bullet 2 to focus on stakeholder impact"'
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleRefine(chatInput);
+                  }
+                }}
+                rows={2}
+                disabled={refining}
+              />
               <button
-                className="rb-download-btn"
-                onClick={handleDownload}
-                disabled={downloading}
+                className="rb-chat-send"
+                onClick={() => handleRefine(chatInput)}
+                disabled={refining || !chatInput.trim()}
               >
-                {downloading && <span className="spinner" />}
-                {downloading ? 'Generating .docx...' : '⬇ Download as Word (.docx)'}
+                {refining ? <span className="spinner dark" /> : '→'}
               </button>
-              <p className="rb-download-hint">
-                Opens directly in Microsoft Word or Google Docs — ready to fine-tune.
-              </p>
             </div>
-
+            <p className="rb-chat-hint">Enter to send · Shift+Enter for new line · Preview updates live</p>
           </div>
-        )}
+
+          {/* Download section */}
+          <div className="rb-download-section">
+            <p className="rb-section-label" style={{ marginBottom: '0.625rem' }}>Download</p>
+            <div className="rb-download-btns">
+              <button className="rb-download-btn word" onClick={handleDownloadWord} disabled={downloading}>
+                {downloading && <span className="spinner dark" />}
+                {downloading ? 'Generating...' : '⬇ Download Word (.docx)'}
+              </button>
+              <button className="rb-download-btn pdf" onClick={handleDownloadPDF}>
+                ⬇ Save as PDF
+              </button>
+            </div>
+            <p className="rb-download-hint">
+              Word opens in Microsoft Word / Google Docs. PDF uses your browser's print dialog — choose "Save as PDF".
+            </p>
+          </div>
+
+        </div>
       </div>
     </div>
   );

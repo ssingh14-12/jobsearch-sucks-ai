@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, send_file
-from app.services.claude_client import build_resume
+from app.services.claude_client import build_resume, refine_resume
 import io
 
 resume_bp = Blueprint('resume', __name__)
@@ -23,6 +23,25 @@ def build():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": f"Resume build failed: {str(e)}"}), 500
+
+
+@resume_bp.route('/resume/refine', methods=['POST'])
+def refine():
+    data = request.get_json()
+    current_resume      = data.get('resume', {})
+    instruction         = data.get('instruction', '').strip()
+    conversation_history = data.get('conversation_history', [])
+
+    if not current_resume:
+        return jsonify({"error": "Resume data is required."}), 400
+    if not instruction:
+        return jsonify({"error": "Instruction is required."}), 400
+
+    try:
+        result = refine_resume(current_resume, instruction, conversation_history)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"Refinement failed: {str(e)}"}), 500
 
 
 @resume_bp.route('/resume/download', methods=['POST'])

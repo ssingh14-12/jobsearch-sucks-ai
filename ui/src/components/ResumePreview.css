@@ -1,0 +1,181 @@
+/* ResumePreview.css
+ * Mimics the exact layout of Soumya's real resume PDFs.
+ * Used both for the on-screen preview AND for print-to-PDF.
+ */
+
+.rp-page {
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10.5pt;
+  line-height: 1.35;
+  padding: 0.65in 0.75in 0.65in 0.75in;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 11in;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.rp-header {
+  text-align: center;
+  margin-bottom: 6pt;
+}
+
+.rp-name {
+  font-size: 17pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 2pt;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.rp-tagline {
+  font-size: 9.5pt;
+  font-weight: 700;
+  margin: 0 0 2pt;
+  color: #1a1a1a;
+}
+
+.rp-contact {
+  font-size: 8.5pt;
+  color: #333333;
+  margin: 0;
+}
+
+/* ── Section heading with bottom border ─────────────────────────────────────── */
+.rp-section {
+  margin-top: 9pt;
+}
+
+.rp-section-heading {
+  font-size: 10pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1.2pt solid #000000;
+  padding-bottom: 1pt;
+  margin: 0 0 5pt;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* ── Education ──────────────────────────────────────────────────────────────── */
+.rp-edu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3pt;
+  gap: 0.5rem;
+}
+
+.rp-edu-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.rp-edu-school {
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+.rp-edu-degree {
+  font-style: italic;
+  font-size: 9.5pt;
+}
+
+.rp-edu-dates {
+  font-size: 9.5pt;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Experience ─────────────────────────────────────────────────────────────── */
+.rp-job {
+  margin-bottom: 7pt;
+}
+
+.rp-job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.rp-job-title-company {
+  font-size: 10pt;
+  flex: 1;
+}
+
+.rp-job-sep {
+  font-weight: 400;
+}
+
+.rp-job-loc {
+  font-weight: 400;
+  font-style: italic;
+}
+
+.rp-job-dates {
+  font-size: 9.5pt;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rp-bullets {
+  margin: 2pt 0 0 12pt;
+  padding: 0;
+  list-style: disc;
+}
+
+.rp-bullets li {
+  font-size: 10pt;
+  margin-bottom: 1.5pt;
+  line-height: 1.35;
+}
+
+/* ── Skills ─────────────────────────────────────────────────────────────────── */
+.rp-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 2pt;
+}
+
+.rp-skill-line {
+  font-size: 10pt;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Certifications ──────────────────────────────────────────────────────────── */
+.rp-cert-row {
+  font-size: 10pt;
+  margin-bottom: 2pt;
+}
+
+/* ── Summary ─────────────────────────────────────────────────────────────────── */
+.rp-summary-text {
+  font-size: 10pt;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── Print styles (for Save as PDF) ─────────────────────────────────────────── */
+@media print {
+  .rp-page {
+    padding: 0.6in 0.75in;
+    min-height: auto;
+    box-shadow: none;
+  }
+
+  .rp-name    { font-size: 16pt; }
+  .rp-tagline { font-size: 9pt; }
+  .rp-contact { font-size: 8pt; }
+
+  .rp-section-heading { font-size: 9.5pt; }
+  .rp-bullets li      { font-size: 9.5pt; }
+  .rp-skill-line      { font-size: 9.5pt; }
+
+  @page {
+    margin: 0.5in;
+    size: letter portrait;
+  }
+}

@@ -525,6 +525,77 @@ Job Description:
     return json.loads(raw)
 
 
+def refine_resume(current_resume, instruction, conversation_history=None):
+    """
+    Takes the current resume JSON + a natural language instruction and applies targeted edits.
+    Returns the complete updated resume JSON in the same structure.
+    """
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+
+    if not api_key or api_key == "your_actual_key_here" or len(api_key) < 30:
+        return mock_refine_response(current_resume, instruction)
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    # Show last 4 turns of history so Claude has context
+    history_text = ""
+    if conversation_history:
+        recent = conversation_history[-4:]
+        history_text = "\n\nPREVIOUS CHANGES MADE IN THIS SESSION:\n" + "\n".join(
+            f"  - \"{h['instruction']}\"" for h in recent
+        )
+
+    prompt = f"""You are refining Soumya Singh's resume based on a specific user instruction.
+
+HOLY GRAIL RULES — apply to any new or changed bullets:
+- XYZ formula: Accomplished X, as measured by Y, by doing Z
+- Business outcome FIRST, method/tool second
+- No "I" — first person implied
+- Max ~40 words per bullet, max 2 lines
+- KEEP all original metrics — never remove or soften numbers
+- Strong action verbs only. BANNED: managed, coordinated, leveraged, utilized, streamlined, spearheaded, helped, assisted, supported, worked on, responsible for
+- One idea per bullet, crystal clear
+- No AI-sounding filler phrases
+
+CURRENT RESUME JSON:
+{json.dumps(current_resume, indent=2)}
+{history_text}
+
+USER'S INSTRUCTION: "{instruction}"
+
+Rules for your response:
+1. Make ONLY the changes the user requested — do not modify anything else
+2. If the user says "add X skill", add it to the most relevant skill category
+3. If the user asks to rewrite a bullet, apply Holy Grail rules
+4. If the user asks to change a summary, keep it 2 sentences, ATS-dense, first-person-free
+5. Return the COMPLETE updated resume in the EXACT same JSON structure as the input
+6. Include a "change_summary" field at the top level describing what you changed in 1 sentence
+
+Return ONLY valid JSON — no markdown, no extra text.
+"""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=4000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    raw = message.content[0].text.strip()
+    raw = raw.replace("```json", "").replace("```", "").strip()
+    result = json.loads(raw)
+    # Ensure change_summary exists
+    if "change_summary" not in result:
+        result["change_summary"] = "Applied your requested changes."
+    return result
+
+
+def mock_refine_response(current_resume, instruction):
+    """Mock refine — echoes the resume with a note about what would change."""
+    updated = dict(current_resume)
+    updated["change_summary"] = f"MOCK: Would apply '{instruction}' — add your API key for real Claude edits."
+    return updated
+
+
 def mock_resume_response(resume_version, company_name):
     c = company_name or "the company"
     v = resume_version or "V1"
