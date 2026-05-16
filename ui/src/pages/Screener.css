@@ -401,6 +401,28 @@
   color: #A0A0BC;
 }
 
+.visa-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.visa-stat-chip {
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.06);
+  color: #D0D0E8;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.visa-source {
+  color: #6A6A88;
+  font-weight: 500;
+}
+
 /* ── Divider inside hero card ── */
 .hero-divider {
   height: 1px;

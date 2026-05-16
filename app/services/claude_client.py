@@ -2,6 +2,7 @@ import anthropic
 import os
 import json
 import re
+import httpx
 
 # This is Soumya's profile — the brain behind every analysis
 SOUMYA_PROFILE = """
@@ -746,6 +747,177 @@ def mock_resume_response(resume_version, company_name):
         "ats_score_after": 81,
         "keywords_added": ["data lineage", "UAT scripts", "sprint ceremonies", "backlog grooming", "stakeholder alignment", "KPI dashboard"],
         "tailoring_notes": f"MOCK RESPONSE — add your Anthropic API key to .env for a resume actually tailored to {c}."
+    }
+
+
+def check_visa_sponsorship(company_name):
+    """
+    Checks real H1B sponsorship history for a company using:
+      1. h1bdata.info  — direct HTTP fetch (LCA filing database)
+      2. DuckDuckGo    — searches myvisajobs.com as fallback
+
+    Returns:
+      {
+        verdict:          'CLEAR' | 'CHECK' | 'NO_DATA',
+        petition_count:   int or None,
+        recent_year:      str or None,   e.g. "2024"
+        note:             str,           human-readable summary
+        source:           str,           where data came from
+      }
+    """
+    if not company_name or len(company_name.strip()) < 2:
+        return {
+            'verdict': 'NO_DATA',
+            'petition_count': None,
+            'recent_year': None,
+            'note': 'No company name — cannot check sponsorship history.',
+            'source': 'none',
+        }
+
+    company = company_name.strip()
+
+    # ── Strategy 1: h1bdata.info direct fetch ──────────────────────────────────
+    try:
+        encoded = company.replace(' ', '+').replace('&', '%26')
+        url = f'https://h1bdata.info/index.php?em={encoded}&job=&city=&year=All+Years'
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml',
+        }
+
+        resp = httpx.get(url, headers=headers, timeout=8, follow_redirects=True)
+
+        if resp.status_code == 200:
+            html = resp.text
+
+            # h1bdata.info shows "X records found" near the top
+            count_match = re.search(
+                r'(\d[\d,]*)\s+record',
+                html, re.IGNORECASE
+            )
+            total = None
+            if count_match:
+                total = int(count_match.group(1).replace(',', ''))
+
+            # If no explicit count, count <tr> rows in the results table
+            if total is None:
+                rows = re.findall(r'<tr[^>]*>', html, re.IGNORECASE)
+                # Subtract header rows / nav rows — rough heuristic
+                data_rows = max(0, len(rows) - 5)
+                if data_rows > 0:
+                    total = data_rows
+
+            # Extract most recent year mentioned in the data
+            years = re.findall(r'\b(202[0-9]|201[5-9])\b', html)
+            recent_year = max(years) if years else None
+
+            if total is not None and total > 0:
+                if total >= 500:
+                    verdict = 'CLEAR'
+                    note = f'{total:,} H1B petitions on record — {company} is an active sponsor.'
+                elif total >= 50:
+                    verdict = 'CHECK'
+                    note = f'{total:,} H1B petitions found — moderate history, verify current policy before applying.'
+                else:
+                    verdict = 'CHECK'
+                    note = f'Only {total:,} H1B petitions found — limited sponsorship history, confirm directly.'
+                return {
+                    'verdict': verdict,
+                    'petition_count': total,
+                    'recent_year': recent_year,
+                    'note': note,
+                    'source': 'h1bdata.info',
+                }
+            elif 'no record' in html.lower() or 'not found' in html.lower() or '0 record' in html.lower():
+                return {
+                    'verdict': 'CHECK',
+                    'petition_count': 0,
+                    'recent_year': None,
+                    'note': f'No H1B filings found for {company} on h1bdata.info — may not sponsor or may file under a different legal entity name.',
+                    'source': 'h1bdata.info',
+                }
+    except Exception:
+        pass  # Fall through to DuckDuckGo
+
+    # ── Strategy 2: DuckDuckGo → myvisajobs.com snippets ──────────────────────
+    try:
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            from duckduckgo_search import DDGS
+
+        query = f'"{company}" H1B visa sponsor myvisajobs.com OR h1bdata.info petitions 2024 2025'
+
+        with DDGS() as ddgs:
+            results = list(ddgs.text(query, max_results=8))
+
+        all_text = ' '.join(
+            (r.get('title', '') + ' ' + r.get('body', ''))
+            for r in results
+        )
+
+        # Try to extract a petition number from snippets
+        num_patterns = [
+            r'([\d,]+)\s+H[-\s]?1[Bb]\s+(?:visa|petition|application|sponsor)',
+            r'H[-\s]?1[Bb]\s+(?:visa|petition)s?\D{0,10}([\d,]+)',
+            r'sponsored\s+([\d,]+)\s+(?:H[-\s]?1[Bb]|visa)',
+            r'([\d,]+)\s+(?:visa\s+)?sponsor',
+        ]
+        found_count = None
+        for pat in num_patterns:
+            m = re.search(pat, all_text, re.IGNORECASE)
+            if m:
+                try:
+                    found_count = int(m.group(1).replace(',', ''))
+                    break
+                except Exception:
+                    continue
+
+        years = re.findall(r'\b(202[0-9]|201[5-9])\b', all_text)
+        recent_year = max(years) if years else None
+
+        # Check for explicit no-sponsor signals
+        no_sponsor_signals = [
+            'does not sponsor', 'will not sponsor', 'no sponsorship',
+            'not sponsor', 'cannot sponsor', 'unable to sponsor',
+        ]
+        if any(sig in all_text.lower() for sig in no_sponsor_signals):
+            return {
+                'verdict': 'CHECK',
+                'petition_count': found_count,
+                'recent_year': recent_year,
+                'note': f'Web search suggests {company} may not sponsor — confirm before applying.',
+                'source': 'web search',
+            }
+
+        if found_count and found_count >= 500:
+            return {
+                'verdict': 'CLEAR',
+                'petition_count': found_count,
+                'recent_year': recent_year,
+                'note': f'{found_count:,} H1B petitions found via web search — {company} appears to be an active sponsor.',
+                'source': 'web search (myvisajobs.com)',
+            }
+        elif found_count and found_count > 0:
+            return {
+                'verdict': 'CHECK',
+                'petition_count': found_count,
+                'recent_year': recent_year,
+                'note': f'{found_count:,} H1B petitions found — some sponsorship history exists, verify current policy.',
+                'source': 'web search (myvisajobs.com)',
+            }
+
+    except Exception:
+        pass
+
+    # ── Fallback: No data found ────────────────────────────────────────────────
+    return {
+        'verdict': 'NO_DATA',
+        'petition_count': None,
+        'recent_year': None,
+        'note': f'Could not retrieve sponsorship data for {company}. Search h1bdata.info manually to verify.',
+        'source': 'none',
     }
 
 

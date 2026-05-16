@@ -7,7 +7,7 @@
  *   3. "Build My Resume →" carries everything to Page 2
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJD } from '../context/JDContext';
 import { api } from '../api';
@@ -58,10 +58,40 @@ export default function Screener() {
   const navigate = useNavigate();
 
   // Pre-fill if JD already loaded from another page
-  const [jdText, setJdText]   = useState(jd || '');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult]   = useState(null);
-  const [error, setError]     = useState('');
+  const [jdText, setJdText]     = useState(jd || '');
+  const [loading, setLoading]   = useState(false);
+  const [result, setResult]     = useState(null);
+  const [error, setError]       = useState('');
+
+  // Live visa check — fires automatically after analysis when company is known
+  const [visaData, setVisaData]       = useState(null);
+  const [visaLoading, setVisaLoading] = useState(false);
+
+  // When a result arrives and the JD didn't explicitly say no sponsorship,
+  // fire a live H1B lookup — don't make the user go look it up themselves.
+  useEffect(() => {
+    if (!result) return;
+    // JD already said no sponsorship — no point in checking
+    if (result.visa_flag === 'SKIP') return;
+
+    const { title, company } = quickParse(jdText);
+    const companyToCheck = company || '';
+    if (!companyToCheck) return;
+
+    setVisaData(null);
+    setVisaLoading(true);
+
+    api.post('/screener/visa-check', { company_name: companyToCheck })
+      .then(res => setVisaData(res.data))
+      .catch(() => setVisaData({
+        verdict: 'NO_DATA',
+        petition_count: null,
+        recent_year: null,
+        note: 'Could not retrieve sponsorship data right now.',
+        source: 'none',
+      }))
+      .finally(() => setVisaLoading(false));
+  }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleAnalyze() {
     if (!jdText.trim()) { setError('Paste a job description first.'); return; }
@@ -69,6 +99,7 @@ export default function Screener() {
     setError('');
     setLoading(true);
     setResult(null);
+    setVisaData(null);
 
     // Extract title + company client-side before calling Flask
     const { title, company } = quickParse(jdText);
@@ -232,21 +263,60 @@ export default function Screener() {
             </div>
           )}
 
-          {/* Visa — always shown so you never miss a sponsorship issue */}
-          {result.visa_flag && (
-            <div className={`visa-flag visa-flag-${result.visa_flag === 'SKIP' ? 'skip' : result.visa_flag === 'CLEAR' ? 'clear' : 'check'}`}>
+          {/* ── Visa Sponsorship — live lookup, never just "go check" ── */}
+          {result.visa_flag === 'SKIP' ? (
+            /* JD explicitly said no sponsorship — show immediately, no lookup needed */
+            <div className="visa-flag visa-flag-skip">
+              <span className="visa-icon">🚫</span>
+              <div className="visa-body">
+                <span className="visa-label">No Sponsorship — Skip This Role</span>
+                <span className="visa-note">{result.visa_note}</span>
+              </div>
+            </div>
+          ) : (
+            /* Live lookup panel */
+            <div className={`visa-flag ${
+              visaLoading             ? 'visa-flag-check' :
+              !visaData               ? 'visa-flag-check' :
+              visaData.verdict === 'CLEAR'   ? 'visa-flag-clear' :
+              visaData.verdict === 'NO_DATA' ? 'visa-flag-check' :
+                                               'visa-flag-check'
+            }`}>
               <span className="visa-icon">
-                {result.visa_flag === 'SKIP'  && '🚫'}
-                {result.visa_flag === 'CHECK REQUIRED' && '⚠️'}
-                {result.visa_flag === 'CLEAR' && '✅'}
+                {visaLoading                        ? '🔍' :
+                 visaData?.verdict === 'CLEAR'      ? '✅' :
+                 visaData?.verdict === 'NO_DATA'    ? '❓' :
+                                                      '⚠️'}
               </span>
               <div className="visa-body">
                 <span className="visa-label">
-                  {result.visa_flag === 'SKIP'  && 'No Sponsorship — Skip'}
-                  {result.visa_flag === 'CHECK REQUIRED' && 'Visa Check Required'}
-                  {result.visa_flag === 'CLEAR' && 'Sponsorship Likely'}
+                  {visaLoading ? 'Checking H1B sponsorship history…' :
+                   visaData?.verdict === 'CLEAR'   ? 'Active H1B Sponsor' :
+                   visaData?.verdict === 'NO_DATA' ? 'No Sponsorship Data Found' :
+                                                     'Verify Sponsorship Before Applying'}
                 </span>
-                <span className="visa-note">{result.visa_note}</span>
+                {!visaLoading && visaData && (
+                  <>
+                    <span className="visa-note">{visaData.note}</span>
+                    {visaData.petition_count != null && (
+                      <div className="visa-stats">
+                        <span className="visa-stat-chip">
+                          {visaData.petition_count.toLocaleString()} petitions
+                        </span>
+                        {visaData.recent_year && (
+                          <span className="visa-stat-chip">
+                            data through {visaData.recent_year}
+                          </span>
+                        )}
+                        {visaData.source && visaData.source !== 'none' && (
+                          <span className="visa-stat-chip visa-source">
+                            via {visaData.source}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}
