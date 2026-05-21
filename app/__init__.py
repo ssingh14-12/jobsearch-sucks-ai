@@ -6,8 +6,12 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Allow React (localhost:5173) to talk to Flask (localhost:5000)
-    CORS(app, origins=["http://localhost:5173"])
+    CORS(app, origins=[
+        "http://localhost:5173",           # local dev
+        "https://jobsearchsucks-ai.com",   # production
+        "https://www.jobsearchsucks-ai.com",
+        "https://*.vercel.app",            # Vercel preview deploys
+    ])
 
     from app.routes.auth import auth_bp
     from app.routes.screener import screener_bp
