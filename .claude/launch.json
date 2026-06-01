@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "react-ui",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "C:\\Users\\ssoum\\Documents\\projects\\jobsearch-sucks-ai\\ui",
+      "port": 5173
+    }
+  ]
+}
