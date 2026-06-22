@@ -18,11 +18,13 @@ def create_app():
     from app.routes.rewriter import rewriter_bp
     from app.routes.outreach import outreach_bp
     from app.routes.resume import resume_bp
+    from app.routes.admin import admin_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(screener_bp)
     app.register_blueprint(rewriter_bp)
     app.register_blueprint(outreach_bp)
     app.register_blueprint(resume_bp)
+    app.register_blueprint(admin_bp)
 
     return app

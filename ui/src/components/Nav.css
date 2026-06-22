@@ -109,6 +109,46 @@
   color: #4A4A65;
 }
 
+/* ── User menu ──────────────────────────────────────────────────────────── */
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 1px solid #1E1E30;
+}
+
+.nav-user-name {
+  font-size: 0.8rem;
+  color: #EEEEF5;
+  font-weight: 600;
+}
+
+.nav-admin-link {
+  font-size: 0.72rem;
+  color: #F59E0B;
+  font-weight: 700;
+  text-decoration: none;
+  background: rgba(245,158,11,0.1);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+}
+.nav-admin-link:hover { background: rgba(245,158,11,0.2); }
+
+.nav-signout {
+  background: none;
+  border: 1px solid #1E1E30;
+  border-radius: 6px;
+  color: #5A5A78;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  padding: 0.25rem 0.625rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-signout:hover { border-color: #5A5A78; color: #EEEEF5; }
+
 .pulse-dot {
   width: 5px; height: 5px;
   border-radius: 50%;

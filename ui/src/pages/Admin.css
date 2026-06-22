@@ -1,0 +1,68 @@
+.admin-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.admin-header   { margin-bottom: 2rem; }
+.admin-title    { font-family: 'Syne', sans-serif; font-size: 1.75rem; font-weight: 700; color: #EEEEF5; margin: 0 0 0.25rem; }
+.admin-sub      { font-size: 0.875rem; color: #5A5A78; margin: 0; }
+
+.admin-loading  { display: flex; justify-content: center; padding: 4rem; }
+
+.admin-section  { margin-bottom: 2rem; }
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+}
+.admin-section-title { font-size: 0.9rem; font-weight: 700; color: #EEEEF5; text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+.admin-badge         { background: #00C8E0; color: #07070F; font-size: 0.7rem; font-weight: 700; border-radius: 999px; padding: 0.1rem 0.5rem; }
+
+.admin-empty { font-size: 0.875rem; color: #5A5A78; padding: 1rem 0; }
+
+.admin-table { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #11111C;
+  border: 1px solid #1E1E30;
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  gap: 1rem;
+}
+.admin-row.muted { opacity: 0.6; }
+
+.admin-row-info  { display: flex; align-items: center; gap: 1rem; flex: 1; flex-wrap: wrap; }
+.admin-name      { font-size: 0.9rem; font-weight: 600; color: #EEEEF5; min-width: 120px; }
+.admin-email     { font-size: 0.85rem; color: #5A5A78; }
+.admin-date      { font-size: 0.8rem; color: #5A5A78; }
+
+.admin-status          { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.5rem; border-radius: 4px; }
+.admin-status.approved { color: #10B981; background: rgba(16,185,129,0.1); }
+.admin-status.denied   { color: #EF4444; background: rgba(239,68,68,0.1); }
+
+.admin-row-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+.admin-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.875rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: opacity 0.15s;
+}
+.admin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.admin-btn.approve  { background: rgba(16,185,129,0.15); color: #10B981; }
+.admin-btn.approve:hover:not(:disabled) { background: rgba(16,185,129,0.25); }
+.admin-btn.deny     { background: rgba(239,68,68,0.12); color: #EF4444; }
+.admin-btn.deny:hover:not(:disabled)    { background: rgba(239,68,68,0.22); }

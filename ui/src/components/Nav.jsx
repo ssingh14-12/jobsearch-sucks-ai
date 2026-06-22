@@ -8,8 +8,9 @@
  *   - Nothing            → idle or already seen
  */
 
-import { NavLink, useLocation } from 'react-router-dom';
-import { useJD } from '../context/JDContext';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useJD }   from '../context/JDContext';
+import { useAuth } from '../context/AuthContext';
 import './Nav.css';
 
 // Small dot that appears next to a nav link
@@ -27,10 +28,14 @@ function TaskDot({ status, seenByUser, isCurrentPage }) {
 
 export default function Nav() {
   const location = useLocation();
-  const {
-    jobTitle, company,
-    resumeTask, outreachTask,
-  } = useJD();
+  const navigate = useNavigate();
+  const { jobTitle, company, resumeTask, outreachTask } = useJD();
+  const { profile, signOut } = useAuth();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate('/login');
+  }
 
   const onResume   = location.pathname === '/resume';
   const onOutreach = location.pathname === '/outreach';
@@ -76,7 +81,7 @@ export default function Nav() {
         </NavLink>
       </div>
 
-      {/* Right: Active JD context pill */}
+      {/* Right: JD pill + user menu */}
       <div className="nav-right">
         {jobTitle ? (
           <div className="nav-jd-pill">
@@ -85,6 +90,16 @@ export default function Nav() {
           </div>
         ) : (
           <span className="nav-jd-empty">No JD loaded</span>
+        )}
+
+        {profile && (
+          <div className="nav-user">
+            <span className="nav-user-name">{profile.name?.split(' ')[0] || profile.email}</span>
+            {profile.email === 'soumya3436@gmail.com' && (
+              <NavLink to="/admin" className="nav-admin-link">Admin</NavLink>
+            )}
+            <button className="nav-signout" onClick={handleSignOut}>Sign out</button>
+          </div>
         )}
       </div>
     </nav>

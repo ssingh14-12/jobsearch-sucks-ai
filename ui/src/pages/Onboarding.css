@@ -1,0 +1,279 @@
+.ob-page {
+  min-height: 100vh;
+  background: #07070F;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+}
+
+.ob-card {
+  width: 100%;
+  max-width: 600px;
+  background: #11111C;
+  border: 1px solid #1E1E30;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  margin-top: 2rem;
+}
+
+.ob-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #EEEEF5;
+  margin-bottom: 2rem;
+}
+.ob-logo span { color: #00C8E0; }
+
+/* ── Progress bar ─────────────────────────────────── */
+.ob-progress {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.ob-progress-track {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: #1E1E30;
+  z-index: 0;
+}
+.ob-progress-fill {
+  height: 100%;
+  background: #00C8E0;
+  transition: width 0.4s ease;
+}
+
+.ob-step-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 1;
+}
+.ob-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1E1E30;
+  border: 2px solid #1E1E30;
+  transition: all 0.2s;
+}
+.ob-step-dot.active .ob-dot {
+  background: #00C8E0;
+  border-color: #00C8E0;
+  box-shadow: 0 0 0 4px rgba(0, 200, 224, 0.15);
+}
+.ob-step-dot.done .ob-dot {
+  background: #00C8E0;
+  border-color: #00C8E0;
+}
+.ob-step-label {
+  font-size: 0.7rem;
+  color: #5A5A78;
+  white-space: nowrap;
+}
+.ob-step-dot.active .ob-step-label { color: #00C8E0; }
+.ob-step-dot.done .ob-step-label   { color: #EEEEF5; }
+
+/* ── Step content ─────────────────────────────────── */
+.ob-step { display: flex; flex-direction: column; }
+
+.ob-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #EEEEF5;
+  margin: 0 0 0.4rem;
+}
+
+.ob-sub {
+  font-size: 0.875rem;
+  color: #5A5A78;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.ob-fields { display: flex; flex-direction: column; gap: 0.875rem; }
+.ob-row    { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+
+.ob-field  { display: flex; flex-direction: column; gap: 0.35rem; }
+
+.ob-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5A5A78;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ob-input {
+  background: #07070F;
+  border: 1px solid #1E1E30;
+  border-radius: 8px;
+  padding: 0.7rem 0.875rem;
+  color: #EEEEF5;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ob-input:focus { border-color: #00C8E0; }
+.ob-input::placeholder { color: #5A5A78; }
+
+/* ── Buttons ──────────────────────────────────────── */
+.ob-btn {
+  background: #00C8E0;
+  color: #07070F;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: opacity 0.15s;
+  margin-top: 1.25rem;
+}
+.ob-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.ob-btn:hover:not(:disabled) { opacity: 0.9; }
+
+.ob-btn-secondary {
+  background: transparent;
+  color: #5A5A78;
+  border: 1px solid #1E1E30;
+  border-radius: 8px;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.ob-btn-secondary:hover { border-color: #5A5A78; color: #EEEEF5; }
+
+.ob-btn-row {
+  display: flex;
+  gap: 0.75rem;
+}
+.ob-btn-row .ob-btn { flex: 1; margin-top: 0; }
+.ob-btn-row .ob-btn-secondary { margin-top: 0; }
+
+.ob-skip {
+  font-size: 0.8rem;
+  color: #5A5A78;
+  text-align: center;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+.ob-skip:hover { color: #EEEEF5; }
+
+.ob-skip-hint {
+  font-size: 0.8rem;
+  color: #5A5A78;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.ob-error {
+  font-size: 0.85rem;
+  color: #EF4444;
+  padding: 0.6rem 0.8rem;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Dropzone ─────────────────────────────────────── */
+.ob-dropzone {
+  border: 2px dashed #1E1E30;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  margin-bottom: 1rem;
+}
+.ob-dropzone:hover { border-color: #00C8E0; }
+
+.ob-drop-icon  { font-size: 2rem; margin-bottom: 0.5rem; }
+.ob-drop-text  { font-size: 0.9rem; color: #EEEEF5; margin: 0 0 0.25rem; }
+.ob-drop-hint  { font-size: 0.8rem; color: #5A5A78; margin: 0; }
+
+.ob-file-list  { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
+.ob-file-chip  { display: flex; align-items: center; gap: 0.5rem; background: #1E1E30; border-radius: 6px; padding: 0.4rem 0.75rem; }
+.ob-file-icon  { font-size: 0.9rem; }
+.ob-file-name  { font-size: 0.8rem; color: #EEEEF5; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── How-to box ───────────────────────────────────── */
+.ob-how-to {
+  background: rgba(0, 200, 224, 0.05);
+  border: 1px solid rgba(0, 200, 224, 0.15);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.ob-how-label { font-size: 0.8rem; font-weight: 600; color: #00C8E0; margin: 0 0 0.4rem; }
+.ob-how-list  { font-size: 0.85rem; color: #EEEEF5; margin: 0; padding-left: 1.2rem; }
+.ob-how-list li { margin-bottom: 0.2rem; }
+.ob-how-list strong { color: #00C8E0; }
+
+/* ── Role chips ───────────────────────────────────── */
+.ob-role-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ob-role-chip {
+  background: #07070F;
+  border: 1px solid #1E1E30;
+  border-radius: 20px;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.82rem;
+  color: #5A5A78;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.ob-role-chip:hover    { border-color: #00C8E0; color: #EEEEF5; }
+.ob-role-chip.selected { background: rgba(0,200,224,0.1); border-color: #00C8E0; color: #00C8E0; font-weight: 600; }
+
+/* ── Experience level grid ────────────────────────── */
+.ob-exp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ob-exp-btn {
+  background: #07070F;
+  border: 1px solid #1E1E30;
+  border-radius: 8px;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.ob-exp-btn:hover   { border-color: #00C8E0; }
+.ob-exp-btn.active  { background: rgba(0,200,224,0.1); border-color: #00C8E0; }
+.ob-exp-label { font-size: 0.8rem; font-weight: 600; color: #EEEEF5; }
+.ob-exp-desc  { font-size: 0.7rem; color: #5A5A78; }
+.ob-exp-btn.active .ob-exp-label { color: #00C8E0; }
